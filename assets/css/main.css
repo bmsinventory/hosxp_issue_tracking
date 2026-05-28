@@ -28,6 +28,21 @@ body { font-family: var(--sans); background: var(--bg); color: var(--tx); min-he
 ::-webkit-scrollbar-track { background: var(--bg2); }
 ::-webkit-scrollbar-thumb { background: var(--bg4); border-radius: 3px; }
 
+/* ── Touch & LINE Browser Compatibility ── */
+* { -webkit-tap-highlight-color: transparent; }
+button, select, input, textarea, .nav-item, .hov-clickable, .matrix-cell { touch-action: manipulation; }
+select { -webkit-appearance: auto; appearance: auto; min-height: 40px; cursor: pointer; }
+.btn { min-height: 36px; }
+.btn-sm { min-height: 32px; }
+.interval-sel { min-height: 36px; }
+
+/* ── Sidebar Backdrop (mobile) ── */
+.sb-backdrop { display: none; position: fixed; inset: 0; z-index: 49; background: rgba(0,0,0,.5); }
+.sb-backdrop.show { display: block; }
+
+/* ── Supabase Config Grid ── */
+.sb-grid { display: grid; grid-template-columns: 1fr 1fr auto auto; gap: 10px; align-items: flex-end; }
+
 /* ── Layout ── */
 .sidebar { width: 220px; min-width: 220px; background: var(--bg2); border-right: 1px solid var(--bdr); display: flex; flex-direction: column; position: fixed; top: 0; left: 0; bottom: 0; z-index: 50; transition: transform .25s ease; }
 .sidebar-logo { padding: 20px 20px 16px; border-bottom: 1px solid var(--bdr); }
@@ -249,7 +264,7 @@ tr:hover td { background: rgba(99,132,180,.04); color: var(--tx); }
 /* ── Responsive ── */
 @media (max-width: 900px) {
   .sidebar { transform: translateX(-100%); }
-  .sidebar.open { transform: none; }
+  .sidebar.open { transform: none; box-shadow: 6px 0 24px rgba(0,0,0,.35); }
   .main { margin-left: 0; }
   .metrics-grid { grid-template-columns: repeat(3,1fr); }
   .chart-grid { grid-template-columns: 1fr; }
@@ -257,12 +272,50 @@ tr:hover td { background: rgba(99,132,180,.04); color: var(--tx); }
   .topbar { padding: 0 14px; }
   .content { padding: 16px; }
 }
+@media (max-width: 680px) {
+  /* topbar: hide last-update label, compact auto-badge */
+  #lastUpdateLabel { display: none !important; }
+  .auto-badge { min-width: 70px; padding: 4px 8px; }
+  /* hospital product rows: reduce min-widths */
+  .hov-prod-name { min-width: 130px; }
+  .hov-stat-pills { min-width: 80px; }
+  /* supabase config grid: stack vertically */
+  .sb-grid { grid-template-columns: 1fr; }
+}
 @media (max-width: 600px) {
   .metrics-grid { grid-template-columns: repeat(2,1fr); }
+  .metrics-grid .metric-card:last-child { grid-column: span 2; }
   .ic-m { min-width: calc(50% - 12px); }
+  /* chart popup → bottom sheet */
   .modal-lg { max-height: 88vh; }
   #chartPopup { align-items: flex-end; padding: 0; }
   #chartPopup .modal-lg { border-radius: var(--r) var(--r) 0 0; width: 100%; }
+}
+@media (max-width: 520px) {
+  /* topbar: ultra-compact */
+  .topbar { padding: 0 10px; gap: 6px; }
+  .topbar-actions { gap: 5px; }
+  .topbar-title { font-size: 13px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 130px; }
+  #abLabel { display: none; }
+  .auto-badge { min-width: 28px; padding: 4px 7px; }
+  .interval-sel { width: 82px; padding: 5px 4px; font-size: 11px; }
+  /* prevent iOS auto-zoom on focus */
+  input, select, textarea { font-size: 16px; }
+  /* filter selects: 2 per row */
+  .filter-row select { flex: 1 1 calc(50% - 4px); min-width: calc(50% - 4px); }
+  /* hospital product rows: wrap vertically */
+  .hov-prod-row { flex-wrap: wrap; }
+  .hov-prod-name { min-width: 0; flex: 1; }
+  .hov-sbar { order: 4; flex: 0 0 100%; }
+  .hov-stat-pills { order: 3; min-width: 0; justify-content: flex-start; }
+  .hov-rate { font-size: 18px; }
+  /* issue card body */
+  .ic-body { grid-template-columns: 70px 1fr; }
+}
+@media (max-width: 380px) {
+  .filter-row select { flex: 0 0 100%; min-width: 100%; }
+  .topbar-title { max-width: 90px; }
+  .hov-hdr { flex-wrap: wrap; }
 }
 
 /* ── Admin error text ── */

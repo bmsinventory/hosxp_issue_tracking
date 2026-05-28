@@ -2,7 +2,11 @@
 <html lang="th">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <meta name="format-detection" content="telephone=no,email=no,address=no">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="default">
   <title>BMS ISSUE TRACKING SYSTEM — ติดตามปัญหาระบบ รพ. จังหวัด</title>
 
   <!-- Fonts -->
@@ -109,6 +113,7 @@
     <span style="color:var(--tx3)">สำหรับ รพ. จังหวัดน่าน</span>
   </div>
 </aside>
+<div id="sbBackdrop" class="sb-backdrop" onclick="closeSidebar()"></div>
 
 <!-- ═══════════════════════════════════════════════════════
      MAIN CONTENT
@@ -122,7 +127,7 @@
         <line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/>
       </svg>
     </button>
-    <span class="topbar-title" id="topbarTitle">ภาพรวมจังหวัด</span>
+    <span class="topbar-title" id="topbarTitle">ภาพรวมจังหวัดน่าน</span>
     <div class="topbar-actions">
       <!-- Last updated time -->
       <span id="lastUpdateLabel" style="font-size:11px;font-family:var(--mono);color:var(--tx3);white-space:nowrap;display:none">อัพเดท <span id="lastUpdateTime"></span></span>
@@ -351,7 +356,7 @@ alter table public.app_config enable row level security;
 create policy "Allow all" on public.app_config
   for all using (true) with check (true);</pre>
         </details>
-        <div style="display:grid;grid-template-columns:1fr 1fr auto auto;gap:10px;align-items:flex-end">
+        <div class="sb-grid">
           <div class="field"><label>Supabase URL</label><input id="sbUrl" placeholder="https://xxxx.supabase.co" type="url"></div>
           <div class="field"><label>Anon Key</label>      <input id="sbKey" placeholder="eyJhbGciOiJIUzI1NiI..." type="password"></div>
           <button class="btn btn-primary" onclick="saveSbConfig()" style="height:37px;white-space:nowrap">

@@ -35,12 +35,21 @@ function gotoTabDirect(id, btn) {
   if (view) view.classList.add('active');
   if (btn) btn.classList.add('active');
   document.getElementById('topbarTitle').textContent = TAB_TITLES[id] || id;
-  if (window.innerWidth < 900) document.getElementById('sidebar').classList.remove('open');
+  if (window.innerWidth < 900) closeSidebar();
   if (id === 'user') renderAdminStatus();
 }
 
+function closeSidebar() {
+  document.getElementById('sidebar').classList.remove('open');
+  var bd = document.getElementById('sbBackdrop');
+  if (bd) bd.classList.remove('show');
+}
+
 function toggleSB() {
-  document.getElementById('sidebar').classList.toggle('open');
+  var sb = document.getElementById('sidebar');
+  sb.classList.toggle('open');
+  var bd = document.getElementById('sbBackdrop');
+  if (bd) bd.classList.toggle('show', sb.classList.contains('open'));
 }
 
 /* ── Theme ── */
@@ -78,7 +87,7 @@ function checkResp() {
     btn.style.display = '';
   } else {
     btn.style.display = 'none';
-    document.getElementById('sidebar').classList.remove('open');
+    closeSidebar();
   }
 }
 window.addEventListener('resize', checkResp);
