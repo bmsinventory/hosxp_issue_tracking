@@ -401,6 +401,7 @@ function saveMap() {
   statusProg = document.getElementById('mapProg').value;
   statusWait = document.getElementById('mapWait').value;
   saveState();
+  saveColMapToSb();
   closeMap();
   if (allIssues.length) { updateMetrics(); renderCharts(); renderTimeline(); renderByHosp(); renderAll(); }
   toast('บันทึก Column Mapping แล้ว', 'success');

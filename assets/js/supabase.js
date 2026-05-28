@@ -16,8 +16,10 @@ function initSb() {
     return;
   }
   setSbStatus(true);
-  loadHospitalsFromSb();
   loadAdminPwdFromSb();
+  loadColMapFromSb().then(function () {
+    loadHospitalsFromSb();
+  });
 }
 
 function setSbStatus(ok) {
@@ -104,6 +106,36 @@ async function saveToSb(name, product, url, gid) {
     );
   if (res.error) { toast('บันทึกไม่สำเร็จ: ' + res.error.message, 'error'); return false; }
   return true;
+}
+
+async function loadColMapFromSb() {
+  if (!sbClient) return;
+  var res = await sbClient
+    .from('app_config')
+    .select('value')
+    .eq('key', 'col_map_settings')
+    .maybeSingle();
+  if (res.error || !res.data || !res.data.value) return;
+  try {
+    var cfg = JSON.parse(res.data.value);
+    if (cfg.colMap)     colMap     = cfg.colMap;
+    if (cfg.statusDone) statusDone = cfg.statusDone;
+    if (cfg.statusProg) statusProg = cfg.statusProg;
+    if (cfg.statusWait) statusWait = cfg.statusWait;
+    saveState();
+  } catch (e) {}
+}
+
+async function saveColMapToSb() {
+  if (!sbClient) return;
+  var val = JSON.stringify({ colMap: colMap, statusDone: statusDone, statusProg: statusProg, statusWait: statusWait });
+  var res = await sbClient
+    .from('app_config')
+    .upsert(
+      { key: 'col_map_settings', value: val, updated_at: new Date().toISOString() },
+      { onConflict: 'key' }
+    );
+  if (res.error) toast('บันทึก Column Mapping ไม่สำเร็จ: ' + res.error.message, 'error');
 }
 
 async function deleteFromSb(name, product) {
