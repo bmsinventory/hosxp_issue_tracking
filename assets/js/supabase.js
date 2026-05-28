@@ -16,10 +16,60 @@ function initSb() {
     return;
   }
   setSbStatus(true);
+  trackVisit();
   loadAdminPwdFromSb();
   loadColMapFromSb().then(function () {
     loadHospitalsFromSb();
   });
+}
+
+/* ── Visit Counter ── */
+
+async function trackVisit() {
+  if (!sbClient) return;
+  try {
+    var today   = new Date().toISOString().slice(0, 10);
+    var newVisit = (localStorage.getItem('bms-last-track') !== today);
+
+    var res = await sbClient
+      .from('app_config')
+      .select('key, value')
+      .in('key', ['visit_count', 'visit_today', 'visit_date']);
+
+    var map = {};
+    if (res.data) res.data.forEach(function (r) { map[r.key] = r.value; });
+
+    var total      = parseInt(map['visit_count'] || '0') + 1;
+    var prevDate   = map['visit_date'] || '';
+    var todayCnt   = (prevDate === today ? parseInt(map['visit_today'] || '0') : 0);
+    if (newVisit) {
+      todayCnt++;
+      localStorage.setItem('bms-last-track', today);
+    }
+
+    await sbClient.from('app_config').upsert([
+      { key: 'visit_count', value: String(total),    updated_at: new Date().toISOString() },
+      { key: 'visit_today', value: String(todayCnt), updated_at: new Date().toISOString() },
+      { key: 'visit_date',  value: today,            updated_at: new Date().toISOString() }
+    ], { onConflict: 'key' });
+
+    _renderVisitStats(total, todayCnt, today);
+  } catch (e) {}
+}
+
+function _renderVisitStats(total, todayCnt, date) {
+  var el = document.getElementById('visitStats');
+  if (!el) return;
+  var thDate = new Date(date).toLocaleDateString('th-TH', { day: 'numeric', month: 'short', year: '2-digit' });
+  el.innerHTML =
+    '<div style="display:flex;gap:24px;flex-wrap:wrap;align-items:flex-end">'
+    + '<div><div style="font-size:32px;font-weight:700;font-family:var(--mono);color:var(--ac);line-height:1">' + total.toLocaleString() + '</div>'
+    + '<div style="font-size:10px;color:var(--tx3);font-family:var(--mono);letter-spacing:.07em;text-transform:uppercase;margin-top:3px">ครั้งทั้งหมด</div></div>'
+    + '<div><div style="font-size:32px;font-weight:700;font-family:var(--mono);color:var(--gr);line-height:1">' + todayCnt + '</div>'
+    + '<div style="font-size:10px;color:var(--tx3);font-family:var(--mono);letter-spacing:.07em;text-transform:uppercase;margin-top:3px">วันนี้ (' + thDate + ')</div></div>'
+    + '</div>';
+  var foot = document.getElementById('visitFooter');
+  if (foot) foot.textContent = total.toLocaleString() + ' ครั้ง';
 }
 
 function setSbStatus(ok) {

@@ -105,7 +105,8 @@
 
   <div class="sidebar-footer">
     v1.0 &bull; BMS Issue Tracking<br>
-    <span style="color:var(--tx3)">สำหรับ รพ. จังหวัดน่าน</span>
+    <span style="color:var(--tx3)">สำหรับ รพ. จังหวัดน่าน</span><br>
+    <span style="color:var(--tx3)">เข้าใช้งาน <span id="visitFooter" style="color:var(--ac)">—</span></span>
   </div>
 </aside>
 <div id="sbBackdrop" class="sb-backdrop" onclick="closeSidebar()"></div>
@@ -490,6 +491,15 @@ create policy "Allow all" on public.app_config
 
       <!-- ── Pane: User ── -->
       <div id="stpane-user" class="stab-pane" style="display:none">
+
+      <!-- Visit stats card -->
+      <div class="card" style="margin-bottom:16px">
+        <div class="card-title">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14" height="14"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87"/><path d="M16 3.13a4 4 0 010 7.75"/></svg>
+          สถิติการเข้าใช้งาน
+        </div>
+        <div id="visitStats" style="color:var(--tx3);font-size:12px;font-family:var(--mono)">กำลังโหลด...</div>
+      </div>
 
       <!-- Admin status banner -->
       <div class="card" style="margin-bottom:16px;display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap">
