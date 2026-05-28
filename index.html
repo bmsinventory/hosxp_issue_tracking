@@ -312,11 +312,11 @@
         </button>
       </div>
       <div class="filter-row">
-        <select id="fHosp"    onchange="onHospFilterChange()"><option value="">โรงพยาบาลทั้งหมด</option></select>
-        <select id="fProduct" onchange="renderAll()"><option value="">Product ทั้งหมด</option></select>
-        <select id="fDept"    onchange="renderAll()"><option value="">หน่วยงานทั้งหมด</option></select>
-        <select id="fType"    onchange="renderAll()"><option value="">กลุ่มปัญหาทั้งหมด</option></select>
-        <select id="fStatus"  onchange="renderAll()"><option value="">สถานะทั้งหมด</option></select>
+        <select id="fHosp"    onchange="onFilterChange('fHosp')"><option value="">โรงพยาบาลทั้งหมด</option></select>
+        <select id="fProduct" onchange="onFilterChange('fProduct')"><option value="">Product ทั้งหมด</option></select>
+        <select id="fDept"    onchange="onFilterChange('fDept')"><option value="">หน่วยงานทั้งหมด</option></select>
+        <select id="fType"    onchange="onFilterChange('fType')"><option value="">กลุ่มปัญหาทั้งหมด</option></select>
+        <select id="fStatus"  onchange="onFilterChange('fStatus')"><option value="">สถานะทั้งหมด</option></select>
         <select id="fWeek"    onchange="renderAll()"><option value="">สัปดาห์ทั้งหมด</option></select>
       </div>
       <!-- Filtered stats strip -->

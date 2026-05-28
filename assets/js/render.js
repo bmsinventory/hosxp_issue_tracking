@@ -261,33 +261,76 @@ function parseDateInput(str, endOfDay) {
     : new Date(+p[0], +p[1] - 1, +p[2]);
 }
 
-/* ── Filters (Cascading) ── */
+/* ── Cascading Filter Definitions ── */
 
-function buildSubFilters(src) {
-  var pm = {}, de = {}, ty = {}, st = {}, wk = {};
-  for (var i = 0; i < src.length; i++) {
-    var x = src[i];
-    if (x.product)   pm[x.product]   = 1;
-    if (x.dept)      de[x.dept]      = 1;
-    if (x.type)      ty[x.type]      = 1;
-    if (x.rawStatus) st[x.rawStatus] = 1;
-    if (x.weekKey)   wk[x.weekKey]   = 1;
+var CASCADE_DEFS = [
+  { id: 'fHosp',    field: 'hospital',  label: 'โรงพยาบาลทั้งหมด' },
+  { id: 'fProduct', field: 'product',   label: 'Product ทั้งหมด' },
+  { id: 'fDept',    field: 'dept',      label: 'หน่วยงานทั้งหมด' },
+  { id: 'fType',    field: 'type',      label: 'กลุ่มปัญหาทั้งหมด' },
+  { id: 'fStatus',  field: 'rawStatus', label: 'สถานะทั้งหมด' }
+];
+
+function _filterBy(arr, field, val) {
+  var out = [];
+  for (var i = 0; i < arr.length; i++) if (arr[i][field] === val) out.push(arr[i]);
+  return out;
+}
+
+function _rebuildSelect(el, src, field, label) {
+  var curV = el.value;
+  var vals = {};
+  for (var i = 0; i < src.length; i++) { var v = src[i][field]; if (v) vals[v] = 1; }
+  var arr  = Object.keys(vals).sort();
+  var html = '<option value="">' + label + '</option>';
+  for (var i = 0; i < arr.length; i++) {
+    html += '<option' + (arr[i] === curV ? ' selected' : '') + '>' + arr[i] + '</option>';
   }
-  var pa = Object.keys(pm).sort(), da = Object.keys(de).sort(), ta = Object.keys(ty).sort();
-  var sa = Object.keys(st).sort(), wa = Object.keys(wk).sort();
+  el.innerHTML = html;
+  if (curV && !vals[curV]) el.value = '';
+}
 
-  var pSel = document.getElementById('fProduct');
-  var dSel = document.getElementById('fDept');
-  var tSel = document.getElementById('fType');
-  var sSel = document.getElementById('fStatus');
+function _rebuildWeek(src) {
   var wSel = document.getElementById('fWeek');
+  if (!wSel) return;
+  var curV = wSel.value, wm = {};
+  for (var i = 0; i < src.length; i++) if (src[i].weekKey) wm[src[i].weekKey] = 1;
+  var wa   = Object.keys(wm).sort();
+  var html = '<option value="">สัปดาห์ทั้งหมด</option>';
+  for (var i = 0; i < wa.length; i++) {
+    html += '<option value="' + wa[i] + '"' + (wa[i] === curV ? ' selected' : '') + '>' + weekLabel(wa[i]) + '</option>';
+  }
+  wSel.innerHTML = html;
+  if (curV && !wm[curV]) wSel.value = '';
+}
 
-  var pv = pSel.value, dv = dSel.value, tv = tSel.value, sv = sSel.value, wv = wSel.value;
-  pSel.innerHTML = '<option value="">Product ทั้งหมด</option>'      + pa.map(function (v) { return '<option' + (v === pv ? ' selected' : '') + '>' + v + '</option>'; }).join('');
-  dSel.innerHTML = '<option value="">หน่วยงานทั้งหมด</option>'      + da.map(function (v) { return '<option' + (v === dv ? ' selected' : '') + '>' + v + '</option>'; }).join('');
-  tSel.innerHTML = '<option value="">กลุ่มปัญหาทั้งหมด</option>'   + ta.map(function (v) { return '<option' + (v === tv ? ' selected' : '') + '>' + v + '</option>'; }).join('');
-  sSel.innerHTML = '<option value="">สถานะทั้งหมด</option>'         + sa.map(function (v) { return '<option' + (v === sv ? ' selected' : '') + '>' + v + '</option>'; }).join('');
-  wSel.innerHTML = '<option value="">สัปดาห์ทั้งหมด</option>'       + wa.map(function (v) { return '<option value="' + v + '"' + (v === wv ? ' selected' : '') + '>' + weekLabel(v) + '</option>'; }).join('');
+/* เมื่อ filter ใดเปลี่ยน → rebuild เฉพาะ filter ที่อยู่ถัดลงมาในลำดับ */
+function onFilterChange(changedId) {
+  var pos = -1;
+  for (var i = 0; i < CASCADE_DEFS.length; i++) {
+    if (CASCADE_DEFS[i].id === changedId) { pos = i; break; }
+  }
+  if (pos < 0) { renderAll(); return; }
+
+  /* src = allIssues กรองด้วย filter 0..pos */
+  var src = allIssues;
+  for (var i = 0; i <= pos; i++) {
+    var def = CASCADE_DEFS[i];
+    var el  = document.getElementById(def.id);
+    var v   = el ? el.value : '';
+    if (!v) continue;
+    src = _filterBy(src, def.field, v);
+  }
+
+  /* rebuild filter pos+1 เป็นต้นไป */
+  for (var i = pos + 1; i < CASCADE_DEFS.length; i++) {
+    var def = CASCADE_DEFS[i];
+    var el  = document.getElementById(def.id);
+    if (el) _rebuildSelect(el, src, def.field, def.label);
+  }
+  _rebuildWeek(src);
+
+  renderAll();
 }
 
 function populateFilters() {
@@ -295,14 +338,12 @@ function populateFilters() {
   var hhtml = '<option value="">โรงพยาบาลทั้งหมด</option>';
   for (var i = 0; i < hospitals.length; i++) hhtml += '<option>' + hospitals[i].name + '</option>';
   hs.innerHTML = hhtml;
-  buildSubFilters(allIssues);
-}
-
-function onHospFilterChange() {
-  var fh  = document.getElementById('fHosp').value;
-  var src = fh ? allIssues.filter(function (x) { return x.hospital === fh; }) : allIssues;
-  buildSubFilters(src);
-  renderAll();
+  for (var i = 1; i < CASCADE_DEFS.length; i++) {
+    var def = CASCADE_DEFS[i];
+    var el  = document.getElementById(def.id);
+    if (el) _rebuildSelect(el, allIssues, def.field, def.label);
+  }
+  _rebuildWeek(allIssues);
 }
 
 function clearAllFilters() {
@@ -311,13 +352,18 @@ function clearAllFilters() {
     var el = document.getElementById(ids[i]);
     if (el) el.value = '';
   }
-  var fSearch = document.getElementById('fSearch');
+  var fSearch   = document.getElementById('fSearch');
   var fDateFrom = document.getElementById('fDateFrom');
   var fDateTo   = document.getElementById('fDateTo');
   if (fSearch)   fSearch.value   = '';
   if (fDateFrom) fDateFrom.value = '';
   if (fDateTo)   fDateTo.value   = '';
-  buildSubFilters(allIssues);
+  for (var i = 1; i < CASCADE_DEFS.length; i++) {
+    var def = CASCADE_DEFS[i];
+    var el  = document.getElementById(def.id);
+    if (el) _rebuildSelect(el, allIssues, def.field, def.label);
+  }
+  _rebuildWeek(allIssues);
   renderAll();
 }
 
