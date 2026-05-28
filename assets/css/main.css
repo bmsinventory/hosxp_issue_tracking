@@ -225,7 +225,7 @@ tr:hover td { background: rgba(99,132,180,.04); color: var(--tx); }
 .tsw-ocean { background: linear-gradient(135deg,#030b18 50%,#4d9eff 50%); }
 
 /* ── Auto-refresh Badge ── */
-.auto-badge { display: inline-flex; align-items: center; gap: 6px; font-size: 11px; font-family: var(--mono); color: var(--tx3); background: var(--bg3); border: 1px solid var(--bdr); border-radius: 20px; padding: 4px 10px; transition: all .2s; }
+.auto-badge { display: inline-flex; align-items: center; justify-content: center; gap: 6px; font-size: 11px; font-family: var(--mono); color: var(--tx3); background: var(--bg3); border: 1px solid var(--bdr); border-radius: 20px; padding: 4px 14px; min-width: 130px; transition: all .2s; }
 .auto-badge.active { color: var(--gr); border-color: rgba(34,201,122,.35); background: rgba(34,201,122,.06); }
 .auto-badge.active .ab-dot { background: var(--gr); animation: pulse 1.4s infinite; }
 .ab-dot { width: 7px; height: 7px; border-radius: 50%; background: var(--tx3); flex-shrink: 0; }
