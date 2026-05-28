@@ -100,22 +100,16 @@
     </button>
   </nav>
 
-  <!-- Theme Switcher -->
+  <!-- Theme + Font Size -->
   <div class="theme-swatches">
     <span>ธีม</span>
     <div class="tsw tsw-dark  active" id="tsw-dark"  onclick="setTheme('dark')"  title="Dark"></div>
     <div class="tsw tsw-light"        id="tsw-light" onclick="setTheme('light')" title="Light"></div>
     <div class="tsw tsw-ocean"        id="tsw-ocean" onclick="setTheme('ocean')" title="Ocean"></div>
-  </div>
-
-  <!-- Font Size Control -->
-  <div class="fz-ctrl">
-    <span class="fz-label-txt">ขนาดตัวอักษร</span>
-    <div class="fz-btns">
-      <button class="btn btn-sm btn-icon fz-btn" id="fzBtnM" onclick="adjFontSize(-1)" title="ลดขนาด">A−</button>
-      <span id="fzLabel" class="fz-val">100%</span>
-      <button class="btn btn-sm btn-icon fz-btn" id="fzBtnP" onclick="adjFontSize(1)"  title="เพิ่มขนาด">A+</button>
-    </div>
+    <div class="tsw-sep"></div>
+    <button class="btn btn-sm btn-icon fz-btn" id="fzBtnM" onclick="adjFontSize(-1)" title="ลดขนาด">A−</button>
+    <span id="fzLabel" class="fz-val">100%</span>
+    <button class="btn btn-sm btn-icon fz-btn" id="fzBtnP" onclick="adjFontSize(1)"  title="เพิ่มขนาด">A+</button>
   </div>
 
   <div class="sidebar-footer">
