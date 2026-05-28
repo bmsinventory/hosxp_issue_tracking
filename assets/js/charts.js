@@ -126,7 +126,8 @@ function renderCharts() {
   }
   mh += '</tr></thead><tbody>';
   for (var hi = 0; hi < hospitals.length; hi++) {
-    var h = hospitals[hi];
+    var h   = hospitals[hi];
+    var _hn = h.name.replace(/\\/g, '\\\\').replace(/'/g, "\\'");
     mh += '<tr><td style="padding:8px 16px;border-bottom:1px solid var(--bdr);color:var(--tx);font-weight:500;white-space:nowrap;font-size:13px">' + h.name + '</td>';
     for (var pi = 0; pi < allP.length; pi++) {
       var sh2 = null;
@@ -140,8 +141,9 @@ function renderCharts() {
       var rt   = tot ? Math.round(dc / tot * 100) : 0;
       var dotC = oc > 0 ? '#f04060' : (dc === tot && tot > 0) ? '#22c97a' : '#f5a623';
       var bgC  = oc > 0 ? 'rgba(240,64,96,.08)' : (dc === tot && tot > 0) ? 'rgba(34,201,122,.08)' : 'rgba(245,166,35,.07)';
+      var _pn  = allP[pi].replace(/\\/g, '\\\\').replace(/'/g, "\\'");
       mh += '<td style="padding:6px 14px;border-bottom:1px solid var(--bdr);text-align:center">'
-        + '<div style="display:inline-block;background:' + bgC + ';border:1px solid ' + dotC + '30;border-radius:8px;padding:7px 12px;min-width:80px">'
+        + '<div class="matrix-cell" onclick="showHospProdPopup(\'' + _hn + '\',\'' + _pn + '\')" title="' + h.name + ' — ' + allP[pi] + '" style="display:inline-block;background:' + bgC + ';border:1px solid ' + dotC + '30;border-radius:8px;padding:7px 12px;min-width:80px">'
         + '<div style="display:flex;align-items:center;justify-content:center;gap:5px;margin-bottom:4px">'
         + '<span style="width:7px;height:7px;border-radius:50%;background:' + dotC + ';flex-shrink:0;box-shadow:0 0 6px ' + dotC + '80"></span>'
         + '<span style="font-family:var(--mono);font-size:16px;font-weight:700;color:var(--tx)">' + tot + '</span></div>'

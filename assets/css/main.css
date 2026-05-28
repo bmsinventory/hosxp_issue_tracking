@@ -195,6 +195,8 @@ tr:hover td { background: rgba(99,132,180,.04); color: var(--tx); }
 .hov-card:hover { border-color: var(--bdr2); }
 .hov-hdr { padding: 12px 16px; background: var(--bg3); display: flex; align-items: center; gap: 12px; border-bottom: 1px solid var(--bdr); transition: background .15s; }
 .hov-clickable { cursor: pointer; }
+.matrix-cell { cursor: pointer; transition: transform .15s, box-shadow .15s; }
+.matrix-cell:hover { transform: scale(1.06); box-shadow: 0 4px 16px rgba(0,0,0,.18); }
 .hov-hdr.hov-clickable:hover { background: var(--bg4); }
 .hov-prod-row.hov-clickable:hover { background: rgba(99,132,180,.06); border-radius: var(--r2); }
 .hov-hdr h3 { font-size: 15px; font-weight: 700; color: var(--tx); flex: 1; }
