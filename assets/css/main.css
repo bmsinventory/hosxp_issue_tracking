@@ -154,6 +154,7 @@ tr:hover td { background: rgba(99,132,180,.04); color: var(--tx); }
 /* ── Modal / Overlay ── */
 .overlay { position: fixed; inset: 0; background: rgba(0,0,0,.7); z-index: 200; display: flex; align-items: center; justify-content: center; padding: 20px; }
 .modal { background: var(--bg2); border: 1px solid var(--bdr2); border-radius: var(--r); width: min(600px,100%); max-height: 85vh; overflow-y: auto; box-shadow: 0 24px 60px rgba(0,0,0,.6); }
+.modal-lg { width: min(1140px,100%); max-height: 92vh; }
 .modal-header { padding: 18px 22px; border-bottom: 1px solid var(--bdr); display: flex; align-items: center; justify-content: space-between; gap: 12px; position: sticky; top: 0; background: var(--bg2); z-index: 1; }
 .modal-header h2 { font-size: 15px; font-weight: 600; }
 .modal-body { padding: 20px 22px; }
@@ -259,6 +260,9 @@ tr:hover td { background: rgba(99,132,180,.04); color: var(--tx); }
 @media (max-width: 600px) {
   .metrics-grid { grid-template-columns: repeat(2,1fr); }
   .ic-m { min-width: calc(50% - 12px); }
+  .modal-lg { max-height: 88vh; }
+  #chartPopup { align-items: flex-end; padding: 0; }
+  #chartPopup .modal-lg { border-radius: var(--r) var(--r) 0 0; width: 100%; }
 }
 
 /* ── Admin error text ── */
