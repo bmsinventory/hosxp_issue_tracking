@@ -181,7 +181,6 @@ function fetchSheet(h, sh, cb) {
       sh.issues = parseSheet(text, h.name, sh.product);
       sh.status = 'ok';
       allDetectedHeaders[key] = lastDetectedHeaders;
-      toast('โหลด ' + h.name + ' (' + sh.product + ') สำเร็จ — ' + sh.issues.length + ' รายการ', 'success');
       cb();
     })
     .catch(function () {
