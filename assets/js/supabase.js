@@ -92,7 +92,6 @@ async function loadHospitalsFromSb() {
   }
   renderHospList();
   saveState();
-  toast('โหลด ' + hospitals.length + ' โรงพยาบาล (' + rows.length + ' Product) จาก Supabase', 'success');
   if (hospitals.length) fetchAll(true);
 }
 

@@ -83,6 +83,16 @@ function checkResp() {
 }
 window.addEventListener('resize', checkResp);
 
+/* ── Last Updated ── */
+
+function updateLastUpdate() {
+  var label = document.getElementById('lastUpdateLabel');
+  var time  = document.getElementById('lastUpdateTime');
+  if (!label || !time) return;
+  time.textContent = new Date().toLocaleTimeString('th-TH', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+  label.style.display = '';
+}
+
 /* ── Auto Refresh ── */
 
 var _arTimer    = null;

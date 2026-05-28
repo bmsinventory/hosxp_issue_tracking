@@ -42,7 +42,7 @@ function fetchAll(isAuto) {
     if (icon) icon.style.animation = '';
     postLoad();
     saveState();
-    if (isAuto) toast('อัปเดตอัตโนมัติ ' + new Date().toLocaleTimeString('th-TH', { hour: '2-digit', minute: '2-digit' }), '');
+    updateLastUpdate();
     if (_arMinutes > 0) startAutoCountdown();
   }
 
