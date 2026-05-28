@@ -293,22 +293,26 @@
          VIEW: All Issues
     ════════════════════════════════════ -->
     <div class="view" id="view-all">
-      <!-- Search + Export row -->
+      <!-- Search row -->
       <div class="search-row">
         <div class="search-wrap">
           <svg class="search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14" height="14"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
           <input id="fSearch" type="search" class="search-input" placeholder="ค้นหาปัญหา หน่วยงาน กลุ่มปัญหา..." oninput="renderAll()">
         </div>
+      </div>
+      <!-- Date range + actions row -->
+      <div class="date-row">
         <input type="date" id="fDateFrom" onchange="renderAll()" title="ตั้งแต่วันที่" class="date-input">
-        <span style="font-size:11px;color:var(--tx3);white-space:nowrap;align-self:center">ถึง</span>
+        <span class="date-sep">ถึง</span>
         <input type="date" id="fDateTo"   onchange="renderAll()" title="ถึงวันที่"     class="date-input">
+        <div style="flex:1"></div>
         <button class="btn btn-sm" onclick="clearAllFilters()" title="ล้างตัวกรองทั้งหมด">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="13" height="13"><path d="M3 6h18M8 6V4h8v2M19 6l-1 14H6L5 6"/></svg>
-          <span class="btn-text">ล้าง</span>
+          ล้าง
         </button>
         <button class="btn btn-sm" onclick="exportCSV()" title="ดาวน์โหลด CSV" style="color:var(--gr);border-color:rgba(34,201,122,.3)">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="13" height="13"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
-          <span class="btn-text">CSV</span>
+          ดาวน์โหลด CSV
         </button>
       </div>
       <div class="filter-row">
