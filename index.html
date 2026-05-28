@@ -1,196 +1,25 @@
 <!DOCTYPE html>
 <html lang="th">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>BMS ISSUE TRACKING SYSTEM — ติดตามปัญหาระบบ รพ. จังหวัด</title>
-<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Thai:wght@300;400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
-<style>
-:root{--bg:#0c0f14;--bg2:#131720;--bg3:#1a2030;--bg4:#212840;--bdr:rgba(99,132,180,.12);--bdr2:rgba(99,132,180,.22);--tx:#e8edf8;--tx2:#8899bb;--tx3:#4a5878;--ac:#3d8ef8;--gr:#22c97a;--am:#f5a623;--rd:#f04060;--tl:#18c8c8;--mono:'IBM Plex Mono',monospace;--sans:'IBM Plex Sans Thai',sans-serif;--r:10px;--r2:6px}
-[data-theme="light"]{--bg:#f0f3f9;--bg2:#ffffff;--bg3:#e8ecf4;--bg4:#d8dff0;--bdr:rgba(80,110,180,.13);--bdr2:rgba(80,110,180,.26);--tx:#1a2240;--tx2:#3a4d75;--tx3:#7a8db0;--ac:#2a7ef0;--gr:#13a862;--am:#d4881a;--rd:#e03050;--tl:#0eaaaa}
-[data-theme="ocean"]{--bg:#030b18;--bg2:#071226;--bg3:#0a1b38;--bg4:#0d244d;--bdr:rgba(30,120,255,.13);--bdr2:rgba(30,120,255,.26);--tx:#cce0ff;--tx2:#6aaeff;--tx3:#3a6aaa;--ac:#4d9eff;--gr:#00e090;--am:#ffb020;--rd:#ff4060;--tl:#00d8d8}
-*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
-body{font-family:var(--sans);background:var(--bg);color:var(--tx);min-height:100vh;font-size:14px;line-height:1.6}
-::-webkit-scrollbar{width:6px;height:6px}::-webkit-scrollbar-track{background:var(--bg2)}::-webkit-scrollbar-thumb{background:var(--bg4);border-radius:3px}
-.sidebar{width:220px;min-width:220px;background:var(--bg2);border-right:1px solid var(--bdr);display:flex;flex-direction:column;position:fixed;top:0;left:0;bottom:0;z-index:50;transition:transform .25s ease}
-.sidebar-logo{padding:20px 20px 16px;border-bottom:1px solid var(--bdr)}
-.logo-mark{display:flex;align-items:center;gap:10px}
-.logo-icon{width:34px;height:34px;background:linear-gradient(135deg,var(--ac),var(--tl));border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:16px;color:#fff;font-weight:600}
-.logo-text{font-size:15px;font-weight:600;color:var(--tx);letter-spacing:-.01em}
-.logo-sub{font-size:10px;color:var(--tx3);font-family:var(--mono);margin-top:1px}
-.nav{flex:1;padding:12px 10px;display:flex;flex-direction:column;gap:2px;overflow-y:auto}
-.nav-sec{font-size:10px;color:var(--tx3);font-family:var(--mono);letter-spacing:.08em;padding:12px 10px 6px;text-transform:uppercase}
-.nav-item{display:flex;align-items:center;gap:10px;padding:8px 12px;border-radius:var(--r2);color:var(--tx2);cursor:pointer;font-size:13px;border:none;background:none;width:100%;text-align:left;transition:all .15s;font-family:var(--sans)}
-.nav-item:hover{background:var(--bg3);color:var(--tx)}
-.nav-item.active{background:rgba(61,142,248,.12);color:var(--ac)}
-.nav-item svg{width:16px;height:16px;flex-shrink:0}
-.nav-badge{margin-left:auto;font-size:10px;font-family:var(--mono);background:rgba(240,64,96,.2);color:var(--rd);padding:1px 6px;border-radius:9999px}
-.sidebar-footer{padding:14px 16px;border-top:1px solid var(--bdr);font-size:11px;color:var(--tx3);font-family:var(--mono)}
-.main{margin-left:220px;flex:1;display:flex;flex-direction:column;min-width:0}
-.topbar{height:54px;background:var(--bg2);border-bottom:1px solid var(--bdr);display:flex;align-items:center;gap:12px;padding:0 24px;position:sticky;top:0;z-index:40}
-.topbar-title{font-size:15px;font-weight:600;flex:1}
-.topbar-actions{display:flex;gap:8px;align-items:center}
-.content{padding:24px;flex:1}
-.btn{display:inline-flex;align-items:center;gap:7px;padding:7px 14px;border-radius:var(--r2);font-family:var(--sans);font-size:13px;font-weight:500;cursor:pointer;border:1px solid var(--bdr2);background:var(--bg3);color:var(--tx2);transition:all .15s;white-space:nowrap}
-.btn:hover{background:var(--bg4);color:var(--tx)}
-.btn:disabled{opacity:.5;cursor:not-allowed}
-.btn-primary{background:var(--ac);color:#fff;border-color:var(--ac)}
-.btn-primary:hover{background:#5da4ff;color:#fff}
-.btn-danger{color:var(--rd);border-color:rgba(240,64,96,.3)}
-.btn-danger:hover{background:rgba(240,64,96,.08)}
-.btn-sm{padding:5px 10px;font-size:12px}
-.btn-icon{padding:7px}
-.btn svg{width:14px;height:14px}
-.field{display:flex;flex-direction:column;gap:5px}
-.field label{font-size:11px;color:var(--tx3);font-family:var(--mono);letter-spacing:.04em;text-transform:uppercase}
-input,select,textarea{background:var(--bg3);border:1px solid var(--bdr2);color:var(--tx);border-radius:var(--r2);font-family:var(--sans);font-size:13px;padding:8px 11px;width:100%;transition:border-color .15s;outline:none}
-input:focus,select:focus{border-color:var(--ac)}
-input::placeholder{color:var(--tx3)}
-select option{background:var(--bg3)}
-.card{background:var(--bg2);border:1px solid var(--bdr);border-radius:var(--r);padding:18px 20px}
-.card-title{font-size:11px;color:var(--tx3);font-family:var(--mono);letter-spacing:.06em;text-transform:uppercase;margin-bottom:14px}
-.metrics-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:12px;margin-bottom:20px}
-.metric-card{background:var(--bg2);border:1px solid var(--bdr);border-radius:var(--r);padding:16px 18px;position:relative;overflow:hidden}
-.metric-card::before{content:'';position:absolute;top:0;left:0;right:0;height:2px}
-.mc-total::before{background:var(--ac)}.mc-open::before{background:var(--rd)}.mc-prog::before{background:var(--am)}.mc-done::before{background:var(--gr)}.mc-rate::before{background:var(--tl)}
-.metric-label{font-size:11px;color:var(--tx3);font-family:var(--mono);margin-bottom:8px}
-.metric-value{font-size:28px;font-weight:600;color:var(--tx);line-height:1;font-family:var(--mono)}
-.mv-red{color:var(--rd)}.mv-amber{color:var(--am)}.mv-green{color:var(--gr)}.mv-teal{color:var(--tl)}
-.metric-sub{font-size:11px;color:var(--tx3);margin-top:5px}
-.prog-bar{height:4px;background:var(--bg4);border-radius:2px;overflow:hidden;margin-top:6px}
-.prog-fill{height:100%;border-radius:2px;background:var(--gr);transition:width .4s}
-.view{display:none}.view.active{display:block}
-.chart-wrap{position:relative;width:100%}
-.chart-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:16px}
-.legend{display:flex;flex-wrap:wrap;gap:14px;margin-bottom:12px}
-.legend-item{display:flex;align-items:center;gap:6px;font-size:12px;color:var(--tx3);font-family:var(--mono)}
-.legend-dot{width:10px;height:10px;border-radius:2px;flex-shrink:0}
-table{width:100%;border-collapse:collapse;font-size:13px}
-th{text-align:left;padding:9px 12px;font-size:10px;font-family:var(--mono);color:var(--tx3);letter-spacing:.06em;text-transform:uppercase;border-bottom:1px solid var(--bdr);white-space:nowrap}
-td{padding:9px 12px;border-bottom:1px solid var(--bdr);color:var(--tx2);vertical-align:middle}
-tr:last-child td{border-bottom:none}
-tr:hover td{background:rgba(99,132,180,.04);color:var(--tx)}
-.table-wrap{overflow-x:auto}
-.pill{display:inline-flex;align-items:center;font-size:11px;padding:2px 9px;border-radius:9999px;font-weight:500;white-space:nowrap;font-family:var(--mono)}
-.pill-open{background:rgba(240,64,96,.12);color:var(--rd)}
-.pill-prog{background:rgba(245,166,35,.12);color:var(--am)}
-.pill-done{background:rgba(34,201,122,.12);color:var(--gr)}
-.pill-wait{background:rgba(99,132,180,.1);color:var(--tx3)}
-.pill-type{background:rgba(61,142,248,.1);color:#7bb4fc}
-.hosp-list{display:flex;flex-direction:column;gap:8px}
-.hosp-card{background:var(--bg2);border:1px solid var(--bdr);border-radius:var(--r);padding:14px 16px;display:flex;align-items:center;gap:14px}
-.hosp-card:hover{border-color:var(--bdr2)}
-.hosp-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0;background:var(--tx3)}
-.hosp-dot.ok{background:var(--gr);box-shadow:0 0 6px rgba(34,201,122,.4)}
-.hosp-dot.loading{background:var(--am);animation:pulse 1s infinite}
-.hosp-dot.error{background:var(--rd)}
-@keyframes pulse{0%,100%{opacity:1}50%{opacity:.4}}
-@keyframes spin{to{transform:rotate(360deg)}}
-.hosp-info{flex:1;min-width:0}
-.hosp-name{font-size:14px;font-weight:600;color:var(--tx)}
-.hosp-url{font-size:11px;color:var(--tx3);font-family:var(--mono);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:280px;margin-top:2px}
-.hosp-stat{display:flex;align-items:center;gap:14px;font-family:var(--mono);font-size:12px;color:var(--tx3)}
-.hs-block{border:1px solid var(--bdr);border-radius:var(--r);overflow:hidden;margin-bottom:14px}
-.hs-hdr{background:var(--bg3);padding:12px 16px;display:flex;align-items:center;justify-content:space-between;gap:12px}
-.hs-hdr h3{font-size:14px;font-weight:600;color:var(--tx)}
-.hs-pills{display:flex;flex-wrap:wrap;gap:5px;padding:10px 14px;border-bottom:1px solid var(--bdr)}
-.week-bar{display:flex;align-items:center;gap:10px;padding:7px 0;border-bottom:1px solid var(--bdr)}
-.week-bar:last-child{border-bottom:none}
-.week-lbl{font-size:12px;font-family:var(--mono);color:var(--tx3);width:50px;flex-shrink:0}
-.week-track{flex:1;height:6px;background:var(--bg3);border-radius:3px;overflow:hidden;display:flex}
-.week-seg{height:100%;transition:width .3s}
-.week-nums{font-size:11px;font-family:var(--mono);color:var(--tx3);display:flex;gap:10px;width:120px;flex-shrink:0;justify-content:flex-end}
-.filter-row{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:16px}
-.filter-row select{width:auto;flex:1;min-width:130px}
-.overlay{position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:200;display:flex;align-items:center;justify-content:center;padding:20px}
-.modal{background:var(--bg2);border:1px solid var(--bdr2);border-radius:var(--r);width:min(600px,100%);max-height:85vh;overflow-y:auto;box-shadow:0 24px 60px rgba(0,0,0,.6)}
-.modal-header{padding:18px 22px;border-bottom:1px solid var(--bdr);display:flex;align-items:center;justify-content:space-between;gap:12px;position:sticky;top:0;background:var(--bg2);z-index:1}
-.modal-header h2{font-size:15px;font-weight:600}
-.modal-body{padding:20px 22px}
-.modal-footer{padding:14px 22px;border-top:1px solid var(--bdr);display:flex;justify-content:flex-end;gap:8px;position:sticky;bottom:0;background:var(--bg2)}
-.map-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px 16px;margin-top:12px}
-.info-box{background:rgba(61,142,248,.06);border:1px solid rgba(61,142,248,.2);border-radius:var(--r2);padding:10px 14px;font-size:12px;color:var(--tx2);line-height:1.7;margin-bottom:16px}
-.info-box strong{color:var(--ac)}
-.empty{text-align:center;padding:3rem 1rem;color:var(--tx3);font-size:13px}
-.empty svg{width:32px;height:32px;margin:0 auto 12px;display:block;opacity:.4}
-.toast-wrap{position:fixed;bottom:20px;right:20px;z-index:999;display:flex;flex-direction:column;gap:8px}
-.toast{background:var(--bg3);border:1px solid var(--bdr2);border-radius:var(--r2);padding:11px 16px;font-size:13px;color:var(--tx);box-shadow:0 8px 24px rgba(0,0,0,.4);display:flex;align-items:center;gap:9px;max-width:320px;animation:fadeUp .2s ease}
-.toast.success{border-color:rgba(34,201,122,.3)}.toast.error{border-color:rgba(240,64,96,.3)}
-@keyframes fadeUp{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:none}}
-.animate-in{animation:fadeUp .35s ease forwards}
-.n1{animation-delay:.04s}.n2{animation-delay:.08s}.n3{animation-delay:.12s}.n4{animation-delay:.16s}.n5{animation-delay:.2s}
-.ic{background:var(--bg2);border:1px solid var(--bdr);border-left:3px solid var(--tx3);border-radius:var(--r);padding:14px 16px;margin-bottom:8px;transition:border-color .15s}
-.ic:hover{border-color:var(--bdr2)}
-.ic.ic-open{border-left-color:var(--rd)}.ic.ic-prog{border-left-color:var(--am)}.ic.ic-done{border-left-color:var(--gr)}.ic.ic-wait{border-left-color:var(--tl)}
-.ic-head{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:7px}
-.ic-seq{font-family:var(--mono);font-size:11px;color:var(--tx3);background:var(--bg3);padding:2px 7px;border-radius:4px;white-space:nowrap}
-.ic-date{font-family:var(--mono);font-size:11px;color:var(--tx3);white-space:nowrap}
-.ic-hosp{font-size:11px;color:var(--ac);font-weight:500;white-space:nowrap}
-.ic-body{display:grid;grid-template-columns:80px 1fr;gap:1px 10px;margin-bottom:10px;align-items:baseline}
-.ic-bl{font-size:10px;font-family:var(--mono);color:var(--tx3);text-transform:uppercase;letter-spacing:.04em;padding-top:3px;white-space:nowrap}
-.ic-bv{font-size:14px;font-weight:500;color:var(--tx);line-height:1.5;padding:2px 0}
-.ic-bv.ic-fix{font-size:13px;font-weight:400;color:var(--tl)}
-.ic-divider{grid-column:1/-1;height:1px;background:var(--bdr);margin:4px 0}
-.ic-meta{display:flex;flex-wrap:wrap;gap:4px 0;border-top:1px solid var(--bdr);padding-top:9px}
-.ic-m{display:flex;flex-direction:column;min-width:110px;flex:1;padding:0 12px 4px 0}
-.ic-ml{font-size:10px;font-family:var(--mono);color:var(--tx3);letter-spacing:.04em;text-transform:uppercase;margin-bottom:2px}
-.ic-mv{font-size:12px;color:var(--tx2)}
-.prod-badge{display:inline-flex;align-items:center;padding:2px 8px;border-radius:4px;font-size:10px;font-family:var(--mono);background:rgba(24,200,200,.1);color:var(--tl);border:1px solid rgba(24,200,200,.2);white-space:nowrap}
-.sheet-row{display:flex;align-items:center;gap:10px;padding:8px 12px;border-bottom:1px solid var(--bdr)}
-.sheet-row:last-child{border-bottom:none}
-.sheet-edit-row{background:var(--bg4);border-bottom:1px solid var(--bdr);padding:10px 12px;display:flex;gap:8px;align-items:flex-end;flex-wrap:wrap}
-/* ── Theme Switcher ── */
-.theme-swatches{display:flex;gap:6px;align-items:center;padding:10px 16px;border-top:1px solid var(--bdr)}
-.theme-swatches span{font-size:10px;color:var(--tx3);font-family:var(--mono)}
-.tsw{width:18px;height:18px;border-radius:50%;cursor:pointer;border:2px solid transparent;transition:transform .15s,border-color .15s;flex-shrink:0}
-.tsw:hover{transform:scale(1.2)}
-.tsw.active{border-color:var(--ac)}
-.tsw-dark{background:linear-gradient(135deg,#0c0f14 50%,#3d8ef8 50%)}
-.tsw-light{background:linear-gradient(135deg,#f0f3f9 50%,#2a7ef0 50%)}
-.tsw-ocean{background:linear-gradient(135deg,#030b18 50%,#4d9eff 50%)}
-/* ── Filter stats strip ── */
-.fstat-strip{display:flex;gap:16px;align-items:center;background:var(--bg3);border:1px solid var(--bdr);border-radius:var(--r2);padding:8px 14px;margin-bottom:12px;flex-wrap:wrap}
-.fstat-item{display:flex;align-items:center;gap:6px;font-family:var(--mono);font-size:12px;color:var(--tx3)}
-.fstat-item strong{font-size:14px;font-weight:600}
-.fstat-sep{width:1px;height:16px;background:var(--bdr2);flex-shrink:0}
-/* ── Hospital Overview Cards ── */
-.hov-card{background:var(--bg2);border:1px solid var(--bdr);border-radius:var(--r);overflow:hidden;margin-bottom:12px}
-.hov-card:hover{border-color:var(--bdr2)}
-.hov-hdr{padding:12px 16px;background:var(--bg3);display:flex;align-items:center;gap:12px;border-bottom:1px solid var(--bdr)}
-.hov-hdr h3{font-size:15px;font-weight:700;color:var(--tx);flex:1}
-.hov-rate{font-size:22px;font-weight:700;font-family:var(--mono)}
-.hov-body{padding:14px 16px;display:flex;flex-direction:column;gap:10px}
-.hov-prod-row{display:flex;align-items:center;gap:10px}
-.hov-prod-name{display:flex;align-items:center;gap:7px;min-width:170px;flex-shrink:0}
-.hov-prod-dot{width:9px;height:9px;border-radius:50%;flex-shrink:0}
-.hov-prod-label{font-size:12px;font-weight:600;color:var(--tx)}
-.hov-prod-cnt{font-size:11px;font-family:var(--mono);color:var(--tx3);margin-left:4px}
-.hov-sbar{flex:1;height:8px;background:var(--bg4);border-radius:4px;overflow:hidden;display:flex;min-width:80px}
-.hov-sbar-seg{height:100%;transition:width .4s}
-.hov-stat-pills{display:flex;gap:5px;flex-wrap:wrap;min-width:140px;justify-content:flex-end}
-.hov-dept-section{margin-top:8px;padding-top:12px;border-top:1px solid var(--bdr)}
-.hov-dept-header{font-size:10px;font-family:var(--mono);color:var(--tx3);letter-spacing:.07em;text-transform:uppercase;margin-bottom:8px}
-.hov-dept-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:5px 16px}
-.hov-dept-item{display:flex;align-items:center;gap:8px;padding:3px 0}
-.hov-dept-name{font-size:12px;color:var(--tx2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;min-width:0;flex:1}
-.hov-dept-bar-wrap{width:80px;height:5px;background:var(--bg4);border-radius:3px;flex-shrink:0;overflow:hidden}
-.hov-dept-bar-fill{height:100%;border-radius:3px;background:var(--ac);opacity:.8}
-.hov-dept-num{font-size:11px;font-family:var(--mono);color:var(--tx3);min-width:20px;text-align:right;flex-shrink:0}
-.auto-badge{display:inline-flex;align-items:center;gap:6px;font-size:11px;font-family:var(--mono);color:var(--tx3);background:var(--bg3);border:1px solid var(--bdr);border-radius:20px;padding:4px 10px;transition:all .2s}
-.auto-badge.active{color:var(--gr);border-color:rgba(34,201,122,.35);background:rgba(34,201,122,.06)}
-.auto-badge.active .ab-dot{background:var(--gr);animation:pulse 1.4s infinite}
-.ab-dot{width:7px;height:7px;border-radius:50%;background:var(--tx3);flex-shrink:0}
-.interval-sel{background:var(--bg3);border:1px solid var(--bdr2);color:var(--tx2);border-radius:var(--r2);font-family:var(--mono);font-size:12px;padding:4px 8px;cursor:pointer;outline:none;transition:border-color .15s}
-.interval-sel:hover,.interval-sel:focus{border-color:var(--ac);color:var(--tx)}
-.interval-sel option{background:var(--bg3)}
-@media(max-width:900px){.sidebar{transform:translateX(-100%)}.sidebar.open{transform:none}.main{margin-left:0}.metrics-grid{grid-template-columns:repeat(3,1fr)}.chart-grid{grid-template-columns:1fr}.map-grid{grid-template-columns:1fr}.topbar{padding:0 14px}.content{padding:16px}}
-@media(max-width:600px){.metrics-grid{grid-template-columns:repeat(2,1fr)}.ic-m{min-width:calc(50% - 12px)}}
-</style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>BMS ISSUE TRACKING SYSTEM — ติดตามปัญหาระบบ รพ. จังหวัด</title>
+
+  <!-- Fonts -->
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Thai:wght@300;400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+
+  <!-- Stylesheet -->
+  <link rel="stylesheet" href="assets/css/main.css">
+
+  <!-- External Libraries -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
 </head>
 <body>
 
+<!-- ═══════════════════════════════════════════════════════
+     SIDEBAR
+════════════════════════════════════════════════════════ -->
 <aside class="sidebar" id="sidebar">
   <div class="sidebar-logo">
     <div class="logo-mark">
@@ -201,6 +30,7 @@ tr:hover td{background:rgba(99,132,180,.04);color:var(--tx)}
       </div>
     </div>
   </div>
+
   <nav class="nav">
     <div class="nav-sec">ภาพรวม</div>
     <button class="nav-item active" onclick="gotoTab('overview',this)">
@@ -211,6 +41,7 @@ tr:hover td{background:rgba(99,132,180,.04);color:var(--tx)}
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
       Timeline
     </button>
+
     <div class="nav-sec">รายละเอียด</div>
     <button class="nav-item" onclick="gotoTab('byhosp',this)">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
@@ -221,6 +52,7 @@ tr:hover td{background:rgba(99,132,180,.04);color:var(--tx)}
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg>
       ปัญหาทั้งหมด
     </button>
+
     <div class="nav-sec">ตั้งค่า</div>
     <button class="nav-item" onclick="gotoTab('hospitals',this)">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg>
@@ -231,23 +63,36 @@ tr:hover td{background:rgba(99,132,180,.04);color:var(--tx)}
       Column Mapping
     </button>
   </nav>
+
+  <!-- Theme Switcher -->
   <div class="theme-swatches">
     <span>ธีม</span>
-    <div class="tsw tsw-dark active" id="tsw-dark" onclick="setTheme('dark')" title="Dark"></div>
-    <div class="tsw tsw-light" id="tsw-light" onclick="setTheme('light')" title="Light"></div>
-    <div class="tsw tsw-ocean" id="tsw-ocean" onclick="setTheme('ocean')" title="Ocean"></div>
+    <div class="tsw tsw-dark  active" id="tsw-dark"  onclick="setTheme('dark')"  title="Dark"></div>
+    <div class="tsw tsw-light"        id="tsw-light" onclick="setTheme('light')" title="Light"></div>
+    <div class="tsw tsw-ocean"        id="tsw-ocean" onclick="setTheme('ocean')" title="Ocean"></div>
   </div>
-  <div class="sidebar-footer">v2.1 &bull; MedTrack Dashboard<br><span style="color:var(--tx3)">สำหรับ รพ. สังกัด สธ.</span></div>
+
+  <div class="sidebar-footer">
+    v2.1 &bull; MedTrack Dashboard<br>
+    <span style="color:var(--tx3)">สำหรับ รพ. สังกัด สธ.</span>
+  </div>
 </aside>
 
+<!-- ═══════════════════════════════════════════════════════
+     MAIN CONTENT
+════════════════════════════════════════════════════════ -->
 <div class="main">
+
+  <!-- Topbar -->
   <header class="topbar">
     <button class="btn btn-icon" id="menuBtn" onclick="toggleSB()" style="display:none" aria-label="เมนู">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="18" height="18"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="18" height="18">
+        <line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/>
+      </svg>
     </button>
     <span class="topbar-title" id="topbarTitle">ภาพรวมจังหวัด</span>
     <div class="topbar-actions">
-      <!-- Auto-refresh status badge -->
+      <!-- Auto-refresh status -->
       <div class="auto-badge" id="autoBadge" title="สถานะอัปเดตอัตโนมัติ">
         <span class="ab-dot" id="abDot"></span>
         <span id="abLabel">ปิดอยู่</span>
@@ -261,22 +106,26 @@ tr:hover td{background:rgba(99,132,180,.04);color:var(--tx)}
       </select>
       <!-- Manual fetch -->
       <button class="btn btn-primary btn-sm" id="fetchBtn" onclick="fetchAll()" title="ดึงข้อมูลใหม่ทันที">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14" height="14" id="fetchIcon"><path d="M23 4v6h-6"/><path d="M20.49 15a9 9 0 11-2.12-9.36L23 10"/></svg>
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14" height="14" id="fetchIcon">
+          <path d="M23 4v6h-6"/><path d="M20.49 15a9 9 0 11-2.12-9.36L23 10"/>
+        </svg>
         <span class="btn-text">ดึงข้อมูล</span>
       </button>
     </div>
   </header>
 
   <div class="content">
+
+    <!-- ── Metric Cards ── -->
     <div class="metrics-grid">
       <div class="metric-card mc-total animate-in n1">
         <div class="metric-label">ปัญหาทั้งหมด</div>
-        <div class="metric-value" id="mTotal">—</div>
-        <div class="metric-sub" id="mSub">จาก — โรงพยาบาล</div>
+        <div class="metric-value"    id="mTotal">—</div>
+        <div class="metric-sub"      id="mSub">จาก — โรงพยาบาล</div>
       </div>
       <div class="metric-card mc-open animate-in n2">
         <div class="metric-label">รอดำเนินการ</div>
-        <div class="metric-value mv-red" id="mOpen">—</div>
+        <div class="metric-value mv-red"   id="mOpen">—</div>
         <div class="metric-sub">ต้องดำเนินการด่วน</div>
       </div>
       <div class="metric-card mc-prog animate-in n3">
@@ -291,12 +140,16 @@ tr:hover td{background:rgba(99,132,180,.04);color:var(--tx)}
       </div>
       <div class="metric-card mc-rate animate-in n5">
         <div class="metric-label">อัตราแก้ไข</div>
-        <div class="metric-value mv-teal" id="mRate">—</div>
-        <div class="metric-sub"><div class="prog-bar"><div class="prog-fill" id="mBar" style="width:0%"></div></div></div>
+        <div class="metric-value mv-teal"  id="mRate">—</div>
+        <div class="metric-sub">
+          <div class="prog-bar"><div class="prog-fill" id="mBar" style="width:0%"></div></div>
+        </div>
       </div>
     </div>
 
-    <!-- Timeline -->
+    <!-- ════════════════════════════════════
+         VIEW: Timeline
+    ════════════════════════════════════ -->
     <div class="view" id="view-timeline">
       <div class="legend">
         <div class="legend-item"><div class="legend-dot" style="background:var(--rd)"></div>รอดำเนินการ</div>
@@ -306,17 +159,31 @@ tr:hover td{background:rgba(99,132,180,.04);color:var(--tx)}
       </div>
       <div class="card" style="margin-bottom:16px">
         <div class="card-title">แนวโน้มปัญหารายสัปดาห์ — ย้อนหลัง 12 สัปดาห์</div>
-        <div class="chart-wrap" style="height:260px"><canvas id="cTimeline" role="img" aria-label="กราฟ timeline">กำลังโหลด...</canvas></div>
+        <div class="chart-wrap" style="height:260px">
+          <canvas id="cTimeline" role="img" aria-label="กราฟ timeline">กำลังโหลด...</canvas>
+        </div>
       </div>
       <div class="card">
         <div class="card-title">สรุปรายสัปดาห์</div>
-        <div id="weekBars"><div class="empty"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>ดึงข้อมูลก่อนเพื่อดู Timeline</div></div>
+        <div id="weekBars">
+          <div class="empty">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+            ดึงข้อมูลก่อนเพื่อดู Timeline
+          </div>
+        </div>
       </div>
     </div>
 
-    <!-- Overview -->
+    <!-- ════════════════════════════════════
+         VIEW: Overview (default)
+    ════════════════════════════════════ -->
     <div class="view active" id="view-overview">
-      <div id="prodCards" style="margin-bottom:20px"><div class="empty"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg>ดึงข้อมูลก่อนเพื่อดูภาพรวม</div></div>
+      <div id="prodCards" style="margin-bottom:20px">
+        <div class="empty">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg>
+          ดึงข้อมูลก่อนเพื่อดูภาพรวม
+        </div>
+      </div>
       <div class="chart-grid" style="margin-bottom:16px">
         <div class="card">
           <div class="card-title">สถานะต่อ Product</div>
@@ -332,60 +199,91 @@ tr:hover td{background:rgba(99,132,180,.04);color:var(--tx)}
         <div id="prodMatrix" style="margin-top:6px"><div class="empty">ดึงข้อมูลก่อน</div></div>
       </div>
       <div class="card">
-        <div class="card-title" style="display:flex;align-items:center;justify-content:space-between">อัตราแก้ไขปัญหา รายโรงพยาบาล<span style="font-size:10px;font-family:var(--mono);color:var(--tx3)">(คลิกกราฟเพื่อดูรายละเอียด)</span></div>
+        <div class="card-title" style="display:flex;align-items:center;justify-content:space-between">
+          อัตราแก้ไขปัญหา รายโรงพยาบาล
+          <span style="font-size:10px;font-family:var(--mono);color:var(--tx3)">(คลิกกราฟเพื่อดูรายละเอียด)</span>
+        </div>
         <div class="chart-wrap" style="height:240px"><canvas id="cHospRate"></canvas></div>
       </div>
     </div>
+
     <!-- Chart Detail Popup -->
     <div class="overlay" id="chartPopup" style="display:none" onclick="if(event.target===this)closeChartPopup()">
       <div class="modal" onclick="event.stopPropagation()" style="max-width:560px;max-height:80vh;display:flex;flex-direction:column">
         <div class="modal-header">
           <h2 id="cpTitle" style="font-size:14px"></h2>
-          <button class="btn btn-icon btn-sm" onclick="closeChartPopup()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14" height="14"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
+          <button class="btn btn-icon btn-sm" onclick="closeChartPopup()">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14" height="14"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+          </button>
         </div>
         <div class="modal-body" id="cpBody" style="overflow-y:auto;flex:1"></div>
       </div>
     </div>
 
-    <!-- By Hosp -->
+    <!-- ════════════════════════════════════
+         VIEW: By Hospital
+    ════════════════════════════════════ -->
     <div class="view" id="view-byhosp">
       <div class="filter-row" style="margin-bottom:14px">
-        <select id="fBHosp" onchange="renderByHosp()" style="min-width:200px"><option value="">โรงพยาบาลทั้งหมด</option></select>
+        <select id="fBHosp" onchange="renderByHosp()" style="min-width:200px">
+          <option value="">โรงพยาบาลทั้งหมด</option>
+        </select>
         <span id="bhSummary" style="font-size:12px;font-family:var(--mono);color:var(--tx3);align-self:center"></span>
       </div>
-      <div id="byHospCont"><div class="empty"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/></svg>ดึงข้อมูลก่อน</div></div>
+      <div id="byHospCont">
+        <div class="empty">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/></svg>
+          ดึงข้อมูลก่อน
+        </div>
+      </div>
     </div>
 
-    <!-- All -->
+    <!-- ════════════════════════════════════
+         VIEW: All Issues
+    ════════════════════════════════════ -->
     <div class="view" id="view-all">
       <div class="filter-row">
-        <select id="fHosp" onchange="onHospFilterChange()"><option value="">โรงพยาบาลทั้งหมด</option></select>
+        <select id="fHosp"    onchange="onHospFilterChange()"><option value="">โรงพยาบาลทั้งหมด</option></select>
         <select id="fProduct" onchange="renderAll()"><option value="">Product ทั้งหมด</option></select>
-        <select id="fDept" onchange="renderAll()"><option value="">หน่วยงานทั้งหมด</option></select>
-        <select id="fType" onchange="renderAll()"><option value="">กลุ่มปัญหาทั้งหมด</option></select>
-        <select id="fStatus" onchange="renderAll()"><option value="">สถานะทั้งหมด</option></select>
-        <select id="fWeek" onchange="renderAll()"><option value="">สัปดาห์ทั้งหมด</option></select>
+        <select id="fDept"    onchange="renderAll()"><option value="">หน่วยงานทั้งหมด</option></select>
+        <select id="fType"    onchange="renderAll()"><option value="">กลุ่มปัญหาทั้งหมด</option></select>
+        <select id="fStatus"  onchange="renderAll()"><option value="">สถานะทั้งหมด</option></select>
+        <select id="fWeek"    onchange="renderAll()"><option value="">สัปดาห์ทั้งหมด</option></select>
       </div>
+      <!-- Filtered stats strip -->
       <div class="fstat-strip" id="fstatStrip" style="display:none">
         <div class="fstat-item"><span>รายการที่กรอง</span><strong id="fst-total" style="color:var(--tx)">0</strong></div>
         <div class="fstat-sep"></div>
         <div class="fstat-item"><span style="color:var(--rd)">●</span>&nbsp;รอดำเนินการ<strong id="fst-open" style="color:var(--rd)">0</strong></div>
-        <div class="fstat-item"><span style="color:var(--am)">●</span>&nbsp;กำลังแก้ไข<strong id="fst-prog" style="color:var(--am)">0</strong></div>
-        <div class="fstat-item"><span style="color:var(--tl)">●</span>&nbsp;รอตอบกลับ<strong id="fst-wait" style="color:var(--tl)">0</strong></div>
-        <div class="fstat-item"><span style="color:var(--gr)">●</span>&nbsp;เสร็จแล้ว<strong id="fst-done" style="color:var(--gr)">0</strong></div>
+        <div class="fstat-item"><span style="color:var(--am)">●</span>&nbsp;กำลังแก้ไข<strong   id="fst-prog" style="color:var(--am)">0</strong></div>
+        <div class="fstat-item"><span style="color:var(--tl)">●</span>&nbsp;รอตอบกลับ<strong   id="fst-wait" style="color:var(--tl)">0</strong></div>
+        <div class="fstat-item"><span style="color:var(--gr)">●</span>&nbsp;เสร็จแล้ว<strong   id="fst-done" style="color:var(--gr)">0</strong></div>
         <div class="fstat-sep"></div>
         <div class="fstat-item">แก้ไขแล้ว<strong id="fst-rate" style="color:var(--gr)">0%</strong></div>
       </div>
-      <div id="allCont"><div class="empty"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/></svg>ดึงข้อมูลก่อน</div></div>
+      <div id="allCont">
+        <div class="empty">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/></svg>
+          ดึงข้อมูลก่อน
+        </div>
+      </div>
     </div>
 
-    <!-- Hospitals -->
+    <!-- ════════════════════════════════════
+         VIEW: Manage Hospitals
+    ════════════════════════════════════ -->
     <div class="view" id="view-hospitals">
+
+      <!-- Supabase connection card -->
       <div class="card" style="margin-bottom:16px">
         <div class="card-title" style="display:flex;align-items:center;gap:8px;margin-bottom:14px">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14" height="14" style="color:var(--tl);flex-shrink:0"><ellipse cx="12" cy="5" rx="9" ry="3"/><path d="M21 12c0 1.66-4 3-9 3s-9-1.34-9-3"/><path d="M3 5v14c0 1.66 4 3 9 3s9-1.34 9-3V5"/></svg>
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14" height="14" style="color:var(--tl);flex-shrink:0">
+            <ellipse cx="12" cy="5" rx="9" ry="3"/>
+            <path d="M21 12c0 1.66-4 3-9 3s-9-1.34-9-3"/>
+            <path d="M3 5v14c0 1.66 4 3 9 3s9-1.34 9-3V5"/>
+          </svg>
           Supabase Database
-          <span id="sbStatusDot" style="width:8px;height:8px;border-radius:50%;background:var(--tx3);display:inline-block;flex-shrink:0;transition:background .3s"></span>
+          <span id="sbStatusDot"  style="width:8px;height:8px;border-radius:50%;background:var(--tx3);display:inline-block;flex-shrink:0;transition:background .3s"></span>
           <span id="sbStatusText" style="font-size:10px;color:var(--tx3);font-weight:400;font-family:var(--mono)">ยังไม่ได้เชื่อมต่อ</span>
         </div>
         <details style="margin-bottom:14px">
@@ -406,14 +304,8 @@ create policy "Allow all" on public.hospital_sheets
   for all using (true) with check (true);</pre>
         </details>
         <div style="display:grid;grid-template-columns:1fr 1fr auto auto;gap:10px;align-items:flex-end">
-          <div class="field">
-            <label>Supabase URL</label>
-            <input id="sbUrl" placeholder="https://xxxx.supabase.co" type="url">
-          </div>
-          <div class="field">
-            <label>Anon Key</label>
-            <input id="sbKey" placeholder="eyJhbGciOiJIUzI1NiI..." type="password">
-          </div>
+          <div class="field"><label>Supabase URL</label><input id="sbUrl" placeholder="https://xxxx.supabase.co" type="url"></div>
+          <div class="field"><label>Anon Key</label>      <input id="sbKey" placeholder="eyJhbGciOiJIUzI1NiI..." type="password"></div>
           <button class="btn btn-primary" onclick="saveSbConfig()" style="height:37px;white-space:nowrap">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14" height="14"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
             เชื่อมต่อ
@@ -424,13 +316,15 @@ create policy "Allow all" on public.hospital_sheets
           </button>
         </div>
       </div>
+
+      <!-- Add hospital card -->
       <div class="card" style="margin-bottom:16px">
         <div class="card-title">เพิ่มโรงพยาบาล &amp; Product</div>
         <div class="info-box" style="margin-bottom:14px">
           <strong>วิธีใช้:</strong> ใส่ชื่อ รพ. ครั้งเดียว → กด <strong>+ เพิ่ม Product</strong> ได้หลายรอบ → กด <strong>บันทึกทั้งหมด</strong> &bull; GID ดึงอัตโนมัติจาก URL
         </div>
 
-        <!-- Step 1: Hospital Name -->
+        <!-- Step 1: Hospital name -->
         <div style="display:flex;align-items:flex-end;gap:10px;margin-bottom:14px">
           <div class="field" style="flex:1;max-width:340px">
             <label>ชื่อโรงพยาบาล</label>
@@ -440,7 +334,7 @@ create policy "Allow all" on public.hospital_sheets
           <div style="font-size:12px;color:var(--tx3);padding-bottom:9px;white-space:nowrap">กรอก 1 ครั้ง เพิ่มได้หลาย Product</div>
         </div>
 
-        <!-- Step 2: Add Product row -->
+        <!-- Step 2: Add product row -->
         <div style="background:var(--bg3);border:1px solid var(--bdr);border-radius:var(--r);padding:14px;margin-bottom:12px">
           <div style="font-size:10px;font-family:var(--mono);color:var(--tx3);letter-spacing:.06em;text-transform:uppercase;margin-bottom:10px">เพิ่ม Product</div>
           <div style="display:flex;gap:10px;align-items:flex-end;flex-wrap:wrap">
@@ -472,7 +366,9 @@ create policy "Allow all" on public.hospital_sheets
 
         <!-- Pending list -->
         <div id="pendingBox" style="display:none;margin-bottom:12px">
-          <div style="font-size:10px;font-family:var(--mono);color:var(--tx3);letter-spacing:.06em;text-transform:uppercase;margin-bottom:8px">รายการที่จะบันทึก (<span id="pendingCount">0</span> รายการ)</div>
+          <div style="font-size:10px;font-family:var(--mono);color:var(--tx3);letter-spacing:.06em;text-transform:uppercase;margin-bottom:8px">
+            รายการที่จะบันทึก (<span id="pendingCount">0</span> รายการ)
+          </div>
           <div id="pendingList" style="display:flex;flex-direction:column;gap:6px"></div>
           <div style="margin-top:12px;display:flex;gap:10px;align-items:center">
             <button class="btn btn-primary" onclick="saveAllPending()" id="saveAllBtn" style="gap:8px">
@@ -483,15 +379,28 @@ create policy "Allow all" on public.hospital_sheets
           </div>
         </div>
       </div>
-      <div class="card">
-        <div class="card-title" style="margin-bottom:12px">โรงพยาบาล (<span id="hospCount">0</span> แห่ง, <span id="sheetCount">0</span> Sheets)</div>
-        <div class="hosp-list" id="hospList"><div class="empty"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/></svg>ยังไม่มีโรงพยาบาล</div></div>
-      </div>
-    </div>
-  </div>
-</div>
 
-<!-- Modal -->
+      <!-- Hospital list card -->
+      <div class="card">
+        <div class="card-title" style="margin-bottom:12px">
+          โรงพยาบาล (<span id="hospCount">0</span> แห่ง, <span id="sheetCount">0</span> Sheets)
+        </div>
+        <div class="hosp-list" id="hospList">
+          <div class="empty">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/></svg>
+            ยังไม่มีโรงพยาบาล
+          </div>
+        </div>
+      </div>
+
+    </div><!-- /view-hospitals -->
+
+  </div><!-- /content -->
+</div><!-- /main -->
+
+<!-- ═══════════════════════════════════════════════════════
+     MODAL: Column Mapping
+════════════════════════════════════════════════════════ -->
 <div class="overlay" id="mapModal" style="display:none" onclick="bgClose(event)">
   <div class="modal" onclick="event.stopPropagation()">
     <div class="modal-header">
@@ -501,7 +410,10 @@ create policy "Allow all" on public.hospital_sheets
       </button>
     </div>
     <div class="modal-body">
-      <div class="info-box">ใส่ชื่อคอลัมน์ตาม Google Sheet (ไม่สนใจตัวพิมพ์ใหญ่-เล็ก) คั่นหลายชื่อด้วยลูกน้ำ เช่น <code style="background:var(--bg4);padding:1px 5px;border-radius:3px;font-family:var(--mono)">วันที่,Date</code></div>
+      <div class="info-box">
+        ใส่ชื่อคอลัมน์ตาม Google Sheet (ไม่สนใจตัวพิมพ์ใหญ่-เล็ก) คั่นหลายชื่อด้วยลูกน้ำ
+        เช่น <code style="background:var(--bg4);padding:1px 5px;border-radius:3px;font-family:var(--mono)">วันที่,Date</code>
+      </div>
       <div id="detectedHdrBox" style="display:none;background:rgba(61,142,248,.06);border:1px solid rgba(61,142,248,.25);border-radius:6px;padding:10px 14px;margin-bottom:14px">
         <div style="font-size:10px;font-family:var(--mono);color:var(--tx3);letter-spacing:.06em;text-transform:uppercase;margin-bottom:6px">หัวคอลัมน์ที่พบในชีตล่าสุด</div>
         <div id="detectedHdrList" style="font-size:12px;color:var(--ac);font-family:var(--mono);line-height:1.8;word-break:break-all"></div>
@@ -518,11 +430,11 @@ create policy "Allow all" on public.hospital_sheets
         </div>
       </div>
       <div style="margin-top:14px;display:grid;grid-template-columns:1fr 1fr;gap:12px">
-        <div class="field"><label>ค่าสถานะ "เสร็จแล้ว"</label><input id="mapDone" placeholder="เสร็จแล้ว,Done,Closed,..."></div>
+        <div class="field"><label>ค่าสถานะ "เสร็จแล้ว"</label>   <input id="mapDone" placeholder="เสร็จแล้ว,Done,Closed,..."></div>
         <div class="field"><label>ค่าสถานะ "กำลังแก้ไข"</label><input id="mapProg" placeholder="กำลังแก้ไข,In Progress,..."></div>
       </div>
       <div style="margin-top:8px;display:grid;grid-template-columns:1fr 1fr;gap:12px">
-        <div class="field"><label>ค่าสถานะ "รอตอบกลับ"</label><input id="mapWait" placeholder="รอตอบกลับ,Pending,Hold,..."></div>
+        <div class="field"><label>ค่าสถานะ "รอตอบกลับ"</label>  <input id="mapWait" placeholder="รอตอบกลับ,Pending,Hold,..."></div>
         <div></div>
       </div>
     </div>
@@ -540,1311 +452,21 @@ create policy "Allow all" on public.hospital_sheets
   </div>
 </div>
 
+<!-- Toast container -->
 <div class="toast-wrap" id="toastWrap"></div>
 
-<script>
-var hospitals = [];
-var allIssues = [];
-var charts = {};
-var storageKey = 'bms-inv-tracking-v2';
-var lastDetectedHeaders = [];
-var lastDetectedStatuses = [];
-var allDetectedHeaders = {};
+<!-- ═══════════════════════════════════════════════════════
+     JavaScript — loaded in dependency order
+════════════════════════════════════════════════════════ -->
+<script src="assets/js/config.js"></script>
+<script src="assets/js/state.js"></script>
+<script src="assets/js/ui.js"></script>
+<script src="assets/js/supabase.js"></script>
+<script src="assets/js/hospital.js"></script>
+<script src="assets/js/data.js"></script>
+<script src="assets/js/charts.js"></script>
+<script src="assets/js/render.js"></script>
+<script src="assets/js/app.js"></script>
 
-var colMap = {
-  sequence:     'ลำดับ',
-  date:         'วันที่รับปัญหา',
-  dept:         'หน่วยงาน',
-  topic:        'ปัญหา',
-  type:         'กลุ่มปัญหา',
-  status:       'สถานะ',
-  fixMethod:    'วิธีการแก้ไข',
-  reporter:     'ผู้แจ้งปัญหา',
-  assignee:     'ผู้รับปัญหา',
-  resolver:     'ผู้แก้ไข',
-  resolvedDate: 'วันที่แก้ไขปัญหา'
-};
-var statusDone = 'เสร็จแล้ว,Closed,Done,Resolved,แก้ไขแล้ว';
-var statusProg = 'กำลังแก้ไข,In Progress,กำลังดำเนินการ,Processing';
-var statusWait = 'รอตอบกลับ,Pending,waiting,Hold,On Hold';
-
-var MAP_FIELDS = [
-  {key:'sequence',label:'ลำดับ'},
-  {key:'date',label:'วันที่รับปัญหา *'},
-  {key:'dept',label:'หน่วยงาน'},
-  {key:'topic',label:'ปัญหา'},
-  {key:'type',label:'กลุ่มปัญหา'},
-  {key:'status',label:'สถานะ'},
-  {key:'fixMethod',label:'วิธีการแก้ไข'},
-  {key:'reporter',label:'ผู้แจ้งปัญหา'},
-  {key:'assignee',label:'ผู้รับปัญหา'},
-  {key:'resolver',label:'ผู้แก้ไข'},
-  {key:'resolvedDate',label:'วันที่แก้ไขปัญหา'}
-];
-
-var TAB_TITLES = {timeline:'Timeline รายสัปดาห์',overview:'ภาพรวมจังหวัด',byhosp:'รายโรงพยาบาล',all:'ปัญหาทั้งหมด',hospitals:'จัดการโรงพยาบาล'};
-
-function saveState(){
-  try{localStorage.setItem(storageKey,JSON.stringify({hospitals:hospitals,colMap:colMap,statusDone:statusDone,statusProg:statusProg,statusWait:statusWait}));}catch(e){}
-}
-function loadState(){
-  try{
-    var raw=localStorage.getItem(storageKey);
-    if(raw){
-      var data=JSON.parse(raw);
-      if(Array.isArray(data.hospitals)){
-        hospitals=data.hospitals;
-        // backward compat: old format had {name,url,gid,status,issues}
-        for(var i=0;i<hospitals.length;i++){
-          if(!hospitals[i].sheets){
-            hospitals[i].sheets=[{product:'',url:hospitals[i].url||'',gid:hospitals[i].gid||'0',status:hospitals[i].status||'wait',issues:hospitals[i].issues||[]}];
-          }
-        }
-      }
-      if(data.colMap)colMap=data.colMap;
-      if(data.statusDone)statusDone=data.statusDone;
-      if(data.statusProg)statusProg=data.statusProg;
-      if(data.statusWait)statusWait=data.statusWait;
-    }
-  }catch(e){hospitals=[];}
-}
-function setBtnState(btn,text,disabled){
-  var label=btn.querySelector('.btn-text');
-  if(label)label.textContent=text;
-  else btn.textContent=text;
-  btn.disabled=disabled;
-}
-function gotoTab(id, btn) {
-  var vs = document.querySelectorAll('.view');
-  for (var i=0;i<vs.length;i++) vs[i].classList.remove('active');
-  var ns = document.querySelectorAll('.nav-item');
-  for (var i=0;i<ns.length;i++) ns[i].classList.remove('active');
-  document.getElementById('view-'+id).classList.add('active');
-  if (btn) btn.classList.add('active');
-  document.getElementById('topbarTitle').textContent = TAB_TITLES[id] || id;
-  if (window.innerWidth < 900) document.getElementById('sidebar').classList.remove('open');
-}
-function toggleSB() { document.getElementById('sidebar').classList.toggle('open'); }
-
-
-/* ── Supabase ── */
-var SB_URL='https://fduftnedexdvpokmegay.supabase.co';
-var SB_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZkdWZ0bmVkZXhkdnBva21lZ2F5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzk5Mzk0ODMsImV4cCI6MjA5NTUxNTQ4M30.lGTF97DvyEyTQWiYpVy-bOZl_bzKBM4jKEZUQnnBttI';
-var sbClient=null;
-function initSb(){
-  var cfg=null;
-  try{cfg=JSON.parse(localStorage.getItem('bms-sb-config')||'null');}catch(e){}
-  var url=(cfg&&cfg.url)||SB_URL;
-  var key=(cfg&&cfg.key)||SB_KEY;
-  document.getElementById('sbUrl').value=url;
-  document.getElementById('sbKey').value=key;
-  try{sbClient=window.supabase.createClient(url,key);}catch(e){toast('Supabase error: '+e.message,'error');return;}
-  setSbStatus(true);
-  loadHospitalsFromSb();
-}
-function setSbStatus(ok){
-  var dot=document.getElementById('sbStatusDot');
-  var txt=document.getElementById('sbStatusText');
-  var btn=document.getElementById('sbReloadBtn');
-  if(ok){
-    dot.style.background='#22c97a';dot.style.boxShadow='0 0 6px #22c97a80';
-    txt.textContent='เชื่อมต่อแล้ว';txt.style.color='#22c97a';
-    if(btn)btn.disabled=false;
-  }else{
-    dot.style.background='var(--rd)';dot.style.boxShadow='none';
-    txt.textContent='เชื่อมต่อไม่สำเร็จ';txt.style.color='var(--rd)';
-    if(btn)btn.disabled=true;
-  }
-}
-function saveSbConfig(){
-  var url=document.getElementById('sbUrl').value.trim();
-  var key=document.getElementById('sbKey').value.trim();
-  if(!url||!key){toast('กรุณาใส่ Supabase URL และ Anon Key','error');return;}
-  localStorage.setItem('bms-sb-config',JSON.stringify({url:url,key:key}));
-  try{sbClient=window.supabase.createClient(url,key);}catch(e){toast('Supabase error: '+e.message,'error');return;}
-  setSbStatus(true);
-  toast('เชื่อมต่อ Supabase แล้ว','success');
-  loadHospitalsFromSb();
-}
-async function loadHospitalsFromSb(){
-  if(!sbClient)return;
-  var btn=document.getElementById('sbReloadBtn');
-  if(btn)btn.disabled=true;
-  var res=await sbClient.from('hospital_sheets').select('*').order('hospital_name').order('product');
-  if(btn)btn.disabled=false;
-  if(res.error){toast('โหลดจาก Supabase ไม่สำเร็จ: '+res.error.message,'error');setSbStatus(false);return;}
-  hospitals=[];allDetectedHeaders={};
-  var rows=res.data||[];
-  for(var i=0;i<rows.length;i++){
-    var row=rows[i];
-    var hosp=null;
-    for(var j=0;j<hospitals.length;j++)if(hospitals[j].name===row.hospital_name){hosp=hospitals[j];break;}
-    if(!hosp){hosp={name:row.hospital_name,sheets:[]};hospitals.push(hosp);}
-    hosp.sheets.push({product:row.product,url:row.sheet_url||'',gid:row.gid||'0',status:'wait',issues:[]});
-  }
-  renderHospList();
-  saveState();
-  toast('โหลด '+hospitals.length+' โรงพยาบาล ('+rows.length+' Product) จาก Supabase','success');
-  if(hospitals.length)fetchAll(true);
-}
-async function saveToSb(name,product,url,gid){
-  if(!sbClient){toast('กรุณาเชื่อมต่อ Supabase ก่อน (ดูการตั้งค่าด้านบน)','error');return false;}
-  var res=await sbClient.from('hospital_sheets')
-    .upsert({hospital_name:name,product:product,sheet_url:url,gid:gid},{onConflict:'hospital_name,product'});
-  if(res.error){toast('บันทึกไม่สำเร็จ: '+res.error.message,'error');return false;}
-  return true;
-}
-async function deleteFromSb(name,product){
-  if(!sbClient){toast('กรุณาเชื่อมต่อ Supabase ก่อน','error');return false;}
-  var res=await sbClient.from('hospital_sheets').delete().eq('hospital_name',name).eq('product',product);
-  if(res.error){toast('ลบไม่สำเร็จ: '+res.error.message,'error');return false;}
-  return true;
-}
-
-/* ── Hospital ── */
-var pendingProducts=[];
-var editingSheet=null;
-
-function toggleEditSheet(hi,si){
-  editingSheet=(editingSheet&&editingSheet.hi===hi&&editingSheet.si===si)?null:{hi:hi,si:si};
-  renderHospList();
-}
-function cancelEditSheet(){editingSheet=null;renderHospList();}
-function autoFillEditGid(url,gidId){
-  var m=url.match(/[#?&]gid=(\d+)/);
-  if(m){var el=document.getElementById(gidId);if(el)el.value=m[1];}
-}
-async function saveEditedSheet(hi,si){
-  var urlEl=document.getElementById('editUrl_'+hi+'_'+si);
-  var gidEl=document.getElementById('editGid_'+hi+'_'+si);
-  if(!urlEl)return;
-  var newUrl=urlEl.value.trim();
-  var newGid=gidEl?gidEl.value.trim()||'0':'0';
-  var h=hospitals[hi],sh=h.sheets[si];
-  var saved=await saveToSb(h.name,sh.product,newUrl,newGid);
-  if(!saved)return;
-  sh.url=newUrl;sh.gid=newGid;
-  editingSheet=null;
-  renderHospList();saveState();
-  toast('อัปเดตลิงก์ '+sh.product+' แล้ว','success');
-}
-
-function autoFillGid(url){
-  var m=url.match(/[#?&]gid=(\d+)/);
-  if(m)document.getElementById('sheetGid').value=m[1];
-}
-
-function onHospNameInput(){
-  if(pendingProducts.length>0)renderPendingList();
-}
-
-var PROD_COLOR_MAP={'HOSxP XE':'#3d8ef8','ระบบคลังสินค้า':'#22c97a','ระบบครุภัณฑ์':'#f5a623','ระบบบัญชี Account':'#8870f8','IPD Paperless':'#18c8c8'};
-
-function stagePendingProduct(){
-  var name=document.getElementById('hospName').value.trim();
-  var product=document.getElementById('hospProduct').value.trim();
-  var url=document.getElementById('sheetUrl').value.trim();
-  var gid=document.getElementById('sheetGid').value.trim()||'0';
-  if(!name){toast('กรุณาใส่ชื่อโรงพยาบาล','error');return;}
-  if(!product){toast('กรุณาเลือก Product','error');return;}
-  // check dup in pending
-  for(var i=0;i<pendingProducts.length;i++){
-    if(pendingProducts[i].product===product){toast('เพิ่ม '+product+' ซ้ำแล้ว','error');return;}
-  }
-  // check dup in saved data
-  for(var i=0;i<hospitals.length;i++){
-    if(hospitals[i].name===name){
-      for(var j=0;j<hospitals[i].sheets.length;j++){
-        if(hospitals[i].sheets[j].product===product){toast(name+' มี '+product+' อยู่แล้ว','error');return;}
-      }
-    }
-  }
-  pendingProducts.push({product:product,url:url,gid:gid});
-  document.getElementById('hospProduct').value='';
-  document.getElementById('sheetUrl').value='';
-  document.getElementById('sheetGid').value='0';
-  renderPendingList();
-  toast('เพิ่ม '+product+' ในรายการ กด "บันทึกทั้งหมด" เพื่อบันทึก','');
-}
-
-function renderPendingList(){
-  var name=document.getElementById('hospName').value.trim();
-  var box=document.getElementById('pendingBox');
-  var list=document.getElementById('pendingList');
-  var cnt=document.getElementById('pendingCount');
-  if(!pendingProducts.length){box.style.display='none';return;}
-  box.style.display='block';
-  cnt.textContent=pendingProducts.length;
-  var html='';
-  for(var i=0;i<pendingProducts.length;i++){
-    var p=pendingProducts[i];
-    var col=PROD_COLOR_MAP[p.product]||'#8899bb';
-    html+='<div style="display:flex;align-items:center;gap:10px;background:var(--bg4);border:1px solid var(--bdr);border-radius:6px;padding:8px 12px;">';
-    html+='<span style="width:10px;height:10px;border-radius:50%;background:'+col+';flex-shrink:0;display:inline-block"></span>';
-    if(name)html+='<span style="font-size:12px;color:var(--tx3);font-family:var(--mono)">'+escHtml(name)+'</span><span style="color:var(--tx3)">›</span>';
-    html+='<span style="font-size:13px;font-weight:600;color:var(--tx)">'+escHtml(p.product)+'</span>';
-    if(p.url)html+='<span style="font-size:11px;font-family:var(--mono);color:var(--tx3);flex:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;min-width:0">'+escHtml(p.url.replace('https://docs.google.com/spreadsheets/d/','…/'))+'</span>';
-    else html+='<span style="font-size:11px;font-family:var(--mono);color:var(--tx3);flex:1">— ไม่มีลิงก์ —</span>';
-    html+='<span style="font-size:10px;font-family:var(--mono);color:var(--tx3)">GID:'+escHtml(p.gid)+'</span>';
-    html+='<button class="btn btn-danger btn-sm btn-icon" onclick="removePending('+i+')" title="ลบออก"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="12" height="12"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>';
-    html+='</div>';
-  }
-  list.innerHTML=html;
-}
-
-function removePending(i){
-  pendingProducts.splice(i,1);
-  renderPendingList();
-}
-
-function clearPending(){
-  pendingProducts=[];
-  renderPendingList();
-}
-
-function escHtml(s){return (s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
-
-async function saveAllPending(){
-  var name=document.getElementById('hospName').value.trim();
-  if(!name){toast('กรุณาใส่ชื่อโรงพยาบาล','error');return;}
-  if(!pendingProducts.length){toast('ยังไม่มี Product ในรายการ','error');return;}
-  var btn=document.getElementById('saveAllBtn');
-  btn.disabled=true;btn.textContent='กำลังบันทึก…';
-  var hosp=null;
-  for(var i=0;i<hospitals.length;i++)if(hospitals[i].name===name){hosp=hospitals[i];break;}
-  if(!hosp){hosp={name:name,sheets:[]};hospitals.push(hosp);}
-  var ok=0,fail=0;
-  for(var i=0;i<pendingProducts.length;i++){
-    var p=pendingProducts[i];
-    var saved=await saveToSb(name,p.product,p.url,p.gid);
-    if(saved){hosp.sheets.push({product:p.product,url:p.url,gid:p.gid,status:'wait',issues:[]});ok++;}
-    else fail++;
-  }
-  btn.disabled=false;btn.innerHTML='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14" height="14"><polyline points="20 6 9 17 4 12"/></svg> บันทึกทั้งหมด';
-  if(ok>0){
-    pendingProducts=[];
-    renderPendingList();
-    document.getElementById('hospProduct').value='';
-    document.getElementById('sheetUrl').value='';
-    document.getElementById('sheetGid').value='0';
-    renderHospList();saveState();
-    toast('บันทึก '+name+' — '+ok+' Product สำเร็จ'+(fail>0?' (ล้มเหลว '+fail+')':''),'success');
-  }
-}
-async function removeSheet(hi,si){
-  var h=hospitals[hi];
-  var sh=h.sheets[si];
-  var deleted=await deleteFromSb(h.name,sh.product);
-  if(!deleted)return;
-  var key=h.name+'|'+sh.product;
-  delete allDetectedHeaders[key];
-  var tmp=[];
-  for(var i=0;i<allIssues.length;i++){
-    if(!(allIssues[i].hospital===h.name&&allIssues[i].product===sh.product))tmp.push(allIssues[i]);
-  }
-  allIssues=tmp;
-  h.sheets.splice(si,1);
-  if(h.sheets.length===0)hospitals.splice(hi,1);
-  renderHospList();updateMetrics();
-  saveState();
-  toast('ลบ '+h.name+' — '+(sh.product||'Sheet')+'  แล้ว','');
-}
-function renderHospList(){
-  var el=document.getElementById('hospList');
-  var totalSheets=0;
-  for(var i=0;i<hospitals.length;i++)totalSheets+=hospitals[i].sheets.length;
-  document.getElementById('hospCount').textContent=hospitals.length;
-  document.getElementById('sheetCount').textContent=totalSheets;
-  // update datalist
-  var dl=document.getElementById('hospNameList');
-  if(dl){var dlh='';for(var i=0;i<hospitals.length;i++)dlh+='<option value="'+hospitals[i].name+'">';dl.innerHTML=dlh;}
-  if(!hospitals.length){el.innerHTML='<div class="empty"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/></svg>ยังไม่มีโรงพยาบาล</div>';return;}
-  var html='';
-  for(var i=0;i<hospitals.length;i++){
-    var h=hospitals[i];
-    var totalIss=0,totalOpen=0;
-    for(var j=0;j<h.sheets.length;j++){
-      for(var k=0;k<h.sheets[j].issues.length;k++){
-        totalIss++;
-        if(h.sheets[j].issues[k].status==='รอดำเนินการ'||h.sheets[j].issues[k].status==='รอตอบกลับ')totalOpen++;
-      }
-    }
-    html+='<div style="background:var(--bg3);border:1px solid var(--bdr);border-radius:var(--r);margin-bottom:10px;overflow:hidden">';
-    html+='<div style="padding:10px 14px;display:flex;align-items:center;gap:10px;border-bottom:1px solid var(--bdr)">';
-    html+='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14" height="14" style="color:var(--tx3)"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/></svg>';
-    html+='<span style="font-weight:600;color:var(--tx);font-size:14px">'+h.name+'</span>';
-    html+='<span style="font-size:11px;font-family:var(--mono);color:var(--tx3)">'+h.sheets.length+' Product</span>';
-    if(totalIss>0)html+='<span style="font-size:11px;font-family:var(--mono);color:var(--tx3)">'+totalIss+' รายการ</span>';
-    if(totalOpen>0)html+='<span style="font-size:11px;font-family:var(--mono);color:var(--rd)">'+totalOpen+' รอ</span>';
-    html+='</div>';
-    for(var j=0;j<h.sheets.length;j++){
-      var sh=h.sheets[j];
-      var open=0,done=0;
-      for(var k=0;k<sh.issues.length;k++){if(sh.issues[k].status==='รอดำเนินการ'||sh.issues[k].status==='รอตอบกลับ')open++;if(sh.issues[k].status==='เสร็จแล้ว')done++;}
-      var rate=sh.issues.length?Math.round(done/sh.issues.length*100):0;
-      var statTxt='';
-      if(sh.status==='ok')statTxt='<span style="color:var(--tx3)">'+sh.issues.length+' รายการ</span><span style="color:'+(open>0?'var(--rd)':'var(--gr)')+'">'+( open>0?open+' รอ':'ครบ')+'</span><span style="color:var(--tx3)">'+rate+'%</span>';
-      else if(sh.status==='loading')statTxt='<span style="color:var(--am)">กำลังโหลด...</span>';
-      else if(sh.status==='error')statTxt='<span style="color:var(--rd)">ดึงไม่ได้</span>';
-      else statTxt='<span style="color:var(--tx3)">รอดึงข้อมูล</span>';
-      var urlTxt=sh.url?sh.url:'(ยังไม่ได้ใส่ลิงก์)';
-      var isEditing=(editingSheet&&editingSheet.hi===i&&editingSheet.si===j);
-      html+='<div class="sheet-row">';
-      html+='<div class="hosp-dot '+sh.status+'"></div>';
-      html+='<span class="prod-badge">'+sh.product+'</span>';
-      html+='<span style="font-size:11px;color:var(--tx3);font-family:var(--mono);flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="'+escHtml(sh.url)+'">'+escHtml(urlTxt.replace('https://docs.google.com/spreadsheets/d/','…/spreadsheets/d/'))+'</span>';
-      html+='<div style="display:flex;gap:8px;font-size:11px;font-family:var(--mono);white-space:nowrap">'+statTxt+'</div>';
-      html+='<button class="btn btn-sm btn-icon" onclick="toggleEditSheet('+i+','+j+')" title="แก้ไขลิงก์"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="12" height="12"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 013 3L7 19l-4 1 1-4L16.5 3.5z"/></svg></button>';
-      html+='<button class="btn btn-danger btn-sm btn-icon" onclick="removeSheet('+i+','+j+')" title="ลบ"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="12" height="12"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 01-2 2H8a2 2 0 01-2-2L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/><path d="M9 6V4h6v2"/></svg></button>';
-      html+='</div>';
-      if(isEditing){
-        html+='<div class="sheet-edit-row">';
-        html+='<div class="field" style="flex:1;min-width:200px"><label>ลิงก์ Google Sheets</label><input id="editUrl_'+i+'_'+j+'" value="'+escHtml(sh.url)+'" oninput="autoFillEditGid(this.value,\'editGid_'+i+'_'+j+'\')" style="font-size:12px"></div>';
-        html+='<div class="field" style="width:80px"><label>GID</label><input id="editGid_'+i+'_'+j+'" value="'+escHtml(sh.gid||'0')+'" style="font-size:12px"></div>';
-        html+='<button class="btn btn-primary btn-sm" onclick="saveEditedSheet('+i+','+j+')" style="height:34px;white-space:nowrap">บันทึก</button>';
-        html+='<button class="btn btn-sm" onclick="cancelEditSheet()" style="height:34px">ยกเลิก</button>';
-        html+='</div>';
-      }
-    }
-    html+='</div>';
-  }
-  el.innerHTML=html;
-}
-
-/* ── Fetch ── */
-function toCSVUrl(url,gid){
-  var m=url.match(/\/d\/([a-zA-Z0-9_-]+)/);
-  if(!m)return null;
-  return 'https://docs.google.com/spreadsheets/d/'+m[1]+'/export?format=csv&gid='+(gid||0);
-}
-function findCol(hdrs,cands){
-  var ca=cands.split(',');
-  for(var i=0;i<ca.length;i++){
-    var c=ca[i].trim().toLowerCase();
-    if(!c)continue;
-    for(var j=0;j<hdrs.length;j++)if(hdrs[j]===c)return j;
-  }
-  return -1;
-}
-function scoreHeaderRow(rowCells){
-  var hdrs=rowCells.map(function(h){return h.trim().toLowerCase();});
-  var score=0;
-  var keys=Object.keys(colMap);
-  for(var i=0;i<keys.length;i++){
-    var cands=colMap[keys[i]].split(',');
-    for(var c=0;c<cands.length;c++){
-      if(hdrs.indexOf(cands[c].trim().toLowerCase())>=0){score++;break;}
-    }
-  }
-  return score;
-}
-function findHeaderRow(rows){
-  var best=0,bestScore=scoreHeaderRow(rows[0]||[]);
-  for(var r=1;r<Math.min(rows.length,6);r++){
-    var s=scoreHeaderRow(rows[r]);
-    if(s>bestScore){bestScore=s;best=r;}
-  }
-  return best;
-}
-function getVal(cols,idx,def){
-  if(def===undefined)def='';
-  if(idx<0||cols[idx]==null)return def;
-  var v=cols[idx].trim();
-  return v||def;
-}
-function parseCSV(text){
-  var rows=[],cols=[],cur='',inQ=false;
-  for(var i=0;i<text.length;i++){
-    var ch=text[i];
-    if(ch==='"'){
-      if(inQ&&text[i+1]==='"'){cur+='"';i++;}
-      else{inQ=!inQ;}
-    }else if(ch===','&&!inQ){
-      cols.push(cur);cur='';
-    }else if((ch==='\r'||ch==='\n')&&!inQ){
-      if(ch==='\r'&&text[i+1]==='\n')i++;
-      cols.push(cur);cur='';
-      var ok=false;for(var j=0;j<cols.length;j++)if(cols[j].trim()){ok=true;break;}
-      if(ok)rows.push(cols);
-      cols=[];
-    }else{
-      cur+=ch;
-    }
-  }
-  if(cur||cols.length){
-    cols.push(cur);
-    var ok=false;for(var j=0;j<cols.length;j++)if(cols[j].trim()){ok=true;break;}
-    if(ok)rows.push(cols);
-  }
-  return rows;
-}
-function normStatus(raw){
-  if(!raw)return 'รอดำเนินการ';
-  var v=raw.toLowerCase();
-  var done=statusDone.toLowerCase().split(',');
-  for(var i=0;i<done.length;i++){var c=done[i].trim();if(c&&v.indexOf(c)>=0)return 'เสร็จแล้ว';}
-  var prog=statusProg.toLowerCase().split(',');
-  for(var i=0;i<prog.length;i++){var c=prog[i].trim();if(c&&v.indexOf(c)>=0)return 'กำลังแก้ไข';}
-  var wait=statusWait.toLowerCase().split(',');
-  for(var i=0;i<wait.length;i++){var c=wait[i].trim();if(c&&v.indexOf(c)>=0)return 'รอตอบกลับ';}
-  return 'รอดำเนินการ';
-}
-function parseDate(raw){
-  if(!raw)return null;
-  raw=raw.trim();
-  var m=raw.match(/^(\d{1,2})[\/\-](\d{1,2})[\/\-](\d{4})$/);
-  if(m){var y=parseInt(m[3]);if(y>2400)y-=543;return new Date(y,parseInt(m[2])-1,parseInt(m[1]));}
-  m=raw.match(/^(\d{4})[\/\-](\d{1,2})[\/\-](\d{1,2})$/);
-  if(m){var y=parseInt(m[1]);if(y>2400)y-=543;return new Date(y,parseInt(m[2])-1,parseInt(m[3]));}
-  var d=new Date(raw);return isNaN(d.getTime())?null:d;
-}
-function weekKey(date){
-  var d=new Date(date.getTime());
-  d.setDate(d.getDate()-d.getDay()+1);
-  return d.getFullYear()+'-'+('0'+(d.getMonth()+1)).slice(-2)+'-'+('0'+d.getDate()).slice(-2);
-}
-function weekLabel(key){var p=key.split('-');return p[2]+'/'+p[1];}
-function parseSheet(text,hname,product){
-  text=text.replace(/^﻿/,'');
-  var rows=parseCSV(text);
-  if(rows.length<2)return[];
-  var hdrRow=findHeaderRow(rows);
-  lastDetectedHeaders=rows[hdrRow].map(function(h){return h.trim();});
-  var hdrs=lastDetectedHeaders.map(function(h){return h.toLowerCase();});
-  var idx={};
-  var keys=Object.keys(colMap);
-  for(var i=0;i<keys.length;i++)idx[keys[i]]=findCol(hdrs,colMap[keys[i]]);
-  var matched=0;for(var k in idx)if(idx[k]>=0)matched++;
-  if(matched===0&&hdrs.length>0){
-    setTimeout(function(){toast(hname+': ไม่พบคอลัมน์ที่ตรงกัน — เปิด Column Mapping เพื่อตรวจสอบ','error');},300);
-  }
-  var res=[];
-  for(var r=hdrRow+1;r<rows.length;r++){
-    var cols=rows[r];
-    var rawSt=getVal(cols,idx.status,'รอดำเนินการ');
-    var rawDt=getVal(cols,idx.date,'');
-    var rawTopic=getVal(cols,idx.topic,'');
-    if(!rawTopic)continue;
-    var dobj=parseDate(rawDt);
-    var wk=dobj?weekKey(dobj):null;
-    res.push({
-      sequence:getVal(cols,idx.sequence,''),
-      hospital:hname,
-      product:(product||''),
-      date:rawDt||'—',
-      dateObj:dobj,
-      weekKey:wk,
-      weekLabel:wk?weekLabel(wk):null,
-      dept:getVal(cols,idx.dept,'—'),
-      topic:rawTopic,
-      type:getVal(cols,idx.type,'ไม่ระบุ'),
-      status:normStatus(rawSt),
-      rawStatus:rawSt||'รอดำเนินการ',
-      fixMethod:getVal(cols,idx.fixMethod,''),
-      reporter:getVal(cols,idx.reporter,'—'),
-      assignee:getVal(cols,idx.assignee,'—'),
-      resolver:getVal(cols,idx.resolver,'—'),
-      resolvedDate:getVal(cols,idx.resolvedDate,'')
-    });
-  }
-  return res;
-}
-function fetchSheet(h,sh,cb){
-  sh.status='loading';renderHospList();
-  var key=h.name+'|'+sh.product;
-  var csv=toCSVUrl(sh.url,sh.gid);
-  if(!csv){sh.status='error';toast('ลิงก์ไม่ถูกต้อง: '+h.name+' '+sh.product,'error');cb();return;}
-  fetch(csv,{mode:'cors'})
-    .then(function(res){if(!res.ok)throw new Error('HTTP '+res.status);return res.text();})
-    .then(function(text){
-      sh.issues=parseSheet(text,h.name,sh.product);
-      sh.status='ok';
-      allDetectedHeaders[key]=lastDetectedHeaders;
-      toast('โหลด '+h.name+' ('+sh.product+') สำเร็จ — '+sh.issues.length+' รายการ','success');
-      cb();
-    })
-    .catch(function(){
-      sh.status='error';
-      toast('โหลด '+h.name+' ('+sh.product+') ไม่สำเร็จ','error');
-      cb();
-    });
-}
-/* ── Auto Refresh ── */
-var _arTimer=null,_arCountdown=null,_arRemain=0,_arMinutes=0;
-
-function setAutoInterval(val){
-  _arMinutes=parseInt(val)||0;
-  clearAutoTimers();
-  localStorage.setItem('bms-auto-interval',_arMinutes);
-  if(_arMinutes>0){
-    startAutoCountdown();
-    toast('อัปเดตอัตโนมัติทุก '+_arMinutes+' นาที','success');
-  } else {
-    updateAutoBadge(false,0);
-    toast('ปิดอัปเดตอัตโนมัติแล้ว','');
-  }
-}
-
-function clearAutoTimers(){
-  if(_arTimer){clearTimeout(_arTimer);_arTimer=null;}
-  if(_arCountdown){clearInterval(_arCountdown);_arCountdown=null;}
-}
-
-function startAutoCountdown(){
-  clearAutoTimers();
-  _arRemain=_arMinutes*60;
-  updateAutoBadge(true,_arRemain);
-  _arCountdown=setInterval(function(){
-    _arRemain--;
-    updateAutoBadge(true,_arRemain);
-    if(_arRemain<=0){
-      clearInterval(_arCountdown);_arCountdown=null;
-      fetchAll(true);
-    }
-  },1000);
-}
-
-function updateAutoBadge(on,secs){
-  var badge=document.getElementById('autoBadge');
-  var label=document.getElementById('abLabel');
-  if(!badge)return;
-  if(!on){badge.classList.remove('active');label.textContent='ปิดอยู่';return;}
-  badge.classList.add('active');
-  var m=Math.floor(secs/60),s=secs%60;
-  label.textContent=(m>0?m+'น. ':'')+String(s).padStart(2,'0')+'ว.';
-}
-
-function fetchAll(isAuto){
-  if(!hospitals.length){
-    if(!isAuto)toast('กรุณาเพิ่มโรงพยาบาลก่อน','error');
-    if(_arMinutes>0)startAutoCountdown();
-    return;
-  }
-  var btn=document.getElementById('fetchBtn');
-  var icon=document.getElementById('fetchIcon');
-  setBtnState(btn,'กำลังดึง...',true);
-  if(icon)icon.style.animation='spin .7s linear infinite';
-  // flatten all sheets
-  var queue=[];
-  for(var i=0;i<hospitals.length;i++)
-    for(var j=0;j<hospitals[i].sheets.length;j++)
-      queue.push({h:hospitals[i],sh:hospitals[i].sheets[j]});
-  var idx=0;
-  function next(){
-    if(idx>=queue.length){
-      allIssues=[];
-      for(var i=0;i<hospitals.length;i++)
-        for(var j=0;j<hospitals[i].sheets.length;j++)
-          allIssues=allIssues.concat(hospitals[i].sheets[j].issues);
-      setBtnState(btn,'ดึงข้อมูล',false);
-      if(icon)icon.style.animation='';
-      postLoad();saveState();
-      if(isAuto)toast('อัปเดตอัตโนมัติ '+new Date().toLocaleTimeString('th-TH',{hour:'2-digit',minute:'2-digit'}),'');
-      if(_arMinutes>0)startAutoCountdown();
-      return;
-    }
-    var q=queue[idx++];
-    fetchSheet(q.h,q.sh,function(){renderHospList();next();});
-  }
-  next();
-}
-function postLoad(){
-  var sm={};
-  for(var i=0;i<allIssues.length;i++)if(allIssues[i].rawStatus)sm[allIssues[i].rawStatus]=1;
-  lastDetectedStatuses=Object.keys(sm).sort();
-  renderHospList();
-  updateMetrics();
-  renderCharts();
-  renderTimeline();
-  renderByHosp();
-  populateFilters();
-  renderAll();
-}
-/* ── Theme ── */
-function setTheme(name){
-  document.documentElement.setAttribute('data-theme',name==='dark'?'':name);
-  localStorage.setItem('bms-theme',name);
-  document.querySelectorAll('.tsw').forEach(function(el){el.classList.remove('active');});
-  var sw=document.getElementById('tsw-'+name);
-  if(sw)sw.classList.add('active');
-}
-
-function initApp(){
-  loadState();
-  renderHospList();
-  populateFilters();
-  checkResp();
-  initSb();
-  // restore theme
-  var th=localStorage.getItem('bms-theme')||'dark';
-  setTheme(th);
-  // restore auto-refresh setting
-  var saved=parseInt(localStorage.getItem('bms-auto-interval'))||0;
-  if(saved>0){
-    _arMinutes=saved;
-    var sel=document.getElementById('intervalSel');
-    if(sel)sel.value=saved;
-    startAutoCountdown();
-  }
-}
-window.addEventListener('DOMContentLoaded',initApp);
-
-
-/* ── Metrics ── */
-function updateMetrics(){
-  var tot=allIssues.length,open=0,prog=0,done=0;
-  for(var i=0;i<allIssues.length;i++){
-    var s=allIssues[i].status;
-    if(s==='รอดำเนินการ')open++;else if(s==='กำลังแก้ไข')prog++;else if(s==='เสร็จแล้ว')done++;
-  }
-  var rate=tot?Math.round(done/tot*100):0;
-  document.getElementById('mTotal').textContent=tot||'—';
-  document.getElementById('mOpen').textContent=open||'—';
-  document.getElementById('mProg').textContent=prog||'—';
-  document.getElementById('mDone').textContent=done||'—';
-  document.getElementById('mRate').textContent=tot?rate+'%':'—';
-  document.getElementById('mBar').style.width=rate+'%';
-  document.getElementById('mSub').textContent='จาก '+hospitals.length+' โรงพยาบาล';
-  var badge=document.getElementById('navBadge');
-  if(open>0){badge.style.display='';badge.textContent=open;}else{badge.style.display='none';}
-}
-
-/* ── Charts ── */
-var COLORS=['#3d8ef8','#22c97a','#f5a623','#f04060','#18c8c8','#8870f8','#ff6b6b','#4ecdc4','#45b7d1','#96ceb4'];
-var PROD_COLORS={'HOSxP XE':'#3d8ef8','ระบบคลังสินค้า':'#22c97a','ระบบครุภัณฑ์':'#f5a623','ระบบบัญชี Account':'#8870f8','IPD Paperless':'#18c8c8'};
-function getProdColor(p,i){return PROD_COLORS[p]||COLORS[i%COLORS.length];}
-function dk(id){if(charts[id]){charts[id].destroy();delete charts[id];}}
-function cnt(arr,key,val){var n=0;for(var i=0;i<arr.length;i++)if(arr[i][key]===val)n++;return n;}
-function renderCharts(){
-  if(!allIssues.length)return;
-  // ── Aggregate by Product ──
-  var prodData={};
-  for(var i=0;i<allIssues.length;i++){
-    var x=allIssues[i],pn=x.product||'ไม่ระบุ';
-    if(!prodData[pn])prodData[pn]={total:0,open:0,prog:0,done:0,wait:0,types:{}};
-    prodData[pn].total++;
-    var st=x.status;
-    if(st==='รอดำเนินการ')prodData[pn].open++;
-    else if(st==='กำลังแก้ไข')prodData[pn].prog++;
-    else if(st==='เสร็จแล้ว')prodData[pn].done++;
-    else prodData[pn].wait++;
-    var tn=x.type||'ไม่ระบุ';
-    prodData[pn].types[tn]=(prodData[pn].types[tn]||0)+1;
-  }
-  var prods=Object.keys(prodData).sort(function(a,b){return prodData[b].total-prodData[a].total;});
-
-  // ── KPI Cards ──
-  var chtml='<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(175px,1fr));gap:12px">';
-  for(var pi=0;pi<prods.length;pi++){
-    var pn=prods[pi],pd=prodData[pn];
-    var rate=pd.total?Math.round(pd.done/pd.total*100):0;
-    var col=getProdColor(pn,pi);
-    var rc=rate>=60?'#22c97a':rate>=30?'#f5a623':'#f04060';
-    chtml+='<div style="background:var(--bg3);border:1px solid var(--bdr);border-top:3px solid '+col+';border-radius:var(--r);padding:16px 18px;position:relative;overflow:hidden">'
-      +'<div style="position:absolute;top:0;right:0;width:90px;height:90px;background:'+col+';opacity:.05;border-radius:0 0 0 90px;pointer-events:none"></div>'
-      +'<div style="font-size:11px;font-weight:600;color:'+col+';margin-bottom:12px;font-family:var(--mono);letter-spacing:.03em">'+pn+'</div>'
-      +'<div style="font-size:38px;font-weight:700;color:var(--tx);font-family:var(--mono);line-height:1;margin-bottom:2px">'+pd.total+'</div>'
-      +'<div style="font-size:9px;color:var(--tx3);font-family:var(--mono);letter-spacing:.08em;margin-bottom:12px;text-transform:uppercase">รายการทั้งหมด</div>'
-      +'<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:2px;border-top:1px solid var(--bdr);padding-top:10px;margin-bottom:12px">'
-      +'<div style="text-align:center"><div style="font-size:20px;font-weight:700;color:#f04060;font-family:var(--mono)">'+pd.open+'</div><div style="font-size:9px;color:var(--tx3);font-family:var(--mono);letter-spacing:.05em;text-transform:uppercase">รอ</div></div>'
-      +'<div style="text-align:center"><div style="font-size:20px;font-weight:700;color:#f5a623;font-family:var(--mono)">'+pd.prog+'</div><div style="font-size:9px;color:var(--tx3);font-family:var(--mono);letter-spacing:.05em;text-transform:uppercase">แก้ไข</div></div>'
-      +'<div style="text-align:center"><div style="font-size:20px;font-weight:700;color:#22c97a;font-family:var(--mono)">'+pd.done+'</div><div style="font-size:9px;color:var(--tx3);font-family:var(--mono);letter-spacing:.05em;text-transform:uppercase">เสร็จ</div></div>'
-      +'</div>'
-      +'<div style="display:flex;align-items:center;gap:8px">'
-      +'<div style="flex:1;height:3px;background:var(--bg4);border-radius:2px;overflow:hidden"><div style="height:100%;width:'+rate+'%;background:'+rc+';border-radius:2px;transition:width .5s"></div></div>'
-      +'<span style="font-size:12px;font-family:var(--mono);color:'+rc+';font-weight:700;min-width:36px;text-align:right">'+rate+'%</span>'
-      +'</div></div>';
-  }
-  chtml+='</div>';
-  document.getElementById('prodCards').innerHTML=chtml;
-
-  // ── Status per Product (horizontal stacked bar) ──
-  dk('cProdStatus');
-  charts.cProdStatus=new Chart(document.getElementById('cProdStatus'),{type:'bar',
-    data:{labels:prods,datasets:[
-      {label:'รอดำเนินการ',data:prods.map(function(n){return prodData[n].open;}),backgroundColor:'#f04060',borderSkipped:false},
-      {label:'กำลังแก้ไข',data:prods.map(function(n){return prodData[n].prog;}),backgroundColor:'#f5a623',borderSkipped:false},
-      {label:'รอตอบกลับ',data:prods.map(function(n){return prodData[n].wait;}),backgroundColor:'rgba(99,132,180,.4)',borderSkipped:false},
-      {label:'เสร็จแล้ว',data:prods.map(function(n){return prodData[n].done;}),backgroundColor:'#22c97a',borderSkipped:false}
-    ]},
-    options:{indexAxis:'y',responsive:true,maintainAspectRatio:false,
-      plugins:{legend:{labels:{color:'#8899bb',font:{size:11,family:'IBM Plex Mono'},boxWidth:8,padding:12}}},
-      scales:{x:{stacked:true,ticks:{color:'#8899bb',font:{size:11}},grid:{color:'rgba(99,132,180,.08)'}},
-              y:{stacked:true,ticks:{color:'#8899bb',font:{size:11}}}}}
-  });
-
-  // ── Issue types per Product (horizontal stacked bar) ──
-  var typeTotal={};
-  for(var pk in prodData)for(var tk in prodData[pk].types)typeTotal[tk]=(typeTotal[tk]||0)+prodData[pk].types[tk];
-  var topT=Object.keys(typeTotal).sort(function(a,b){return typeTotal[b]-typeTotal[a];}).slice(0,7);
-  dk('cProdType');
-  charts.cProdType=new Chart(document.getElementById('cProdType'),{type:'bar',
-    data:{labels:prods,datasets:topT.map(function(tn,ti){
-      return{label:tn,data:prods.map(function(n){return prodData[n].types[tn]||0;}),backgroundColor:COLORS[ti%COLORS.length],borderSkipped:false};
-    })},
-    options:{indexAxis:'y',responsive:true,maintainAspectRatio:false,
-      plugins:{legend:{labels:{color:'#8899bb',font:{size:10,family:'IBM Plex Mono'},boxWidth:8,padding:10}}},
-      scales:{x:{stacked:true,ticks:{color:'#8899bb',font:{size:11}},grid:{color:'rgba(99,132,180,.08)'}},
-              y:{stacked:true,ticks:{color:'#8899bb',font:{size:11}}}}}
-  });
-
-  // ── Hospital × Product matrix ──
-  var allP=[];
-  for(var hi=0;hi<hospitals.length;hi++)for(var si=0;si<hospitals[hi].sheets.length;si++){var pp=hospitals[hi].sheets[si].product;if(pp&&allP.indexOf(pp)<0)allP.push(pp);}
-  allP.sort();
-  var mh='<div style="overflow-x:auto"><table style="width:100%;border-collapse:collapse">'
-    +'<thead><tr>'
-    +'<th style="text-align:left;padding:9px 16px;font-size:10px;font-family:var(--mono);color:var(--tx3);letter-spacing:.06em;text-transform:uppercase;border-bottom:1px solid var(--bdr);white-space:nowrap;min-width:150px">โรงพยาบาล</th>';
-  for(var pi=0;pi<allP.length;pi++){
-    var ac=getProdColor(allP[pi],pi);
-    mh+='<th style="text-align:center;padding:9px 14px;font-size:10px;font-family:var(--mono);color:'+ac+';border-bottom:1px solid var(--bdr);white-space:nowrap;min-width:115px">'
-      +'<span style="display:inline-block;width:6px;height:6px;border-radius:50%;background:'+ac+';margin-right:5px;vertical-align:middle"></span>'
-      +allP[pi]+'</th>';
-  }
-  mh+='</tr></thead><tbody>';
-  for(var hi=0;hi<hospitals.length;hi++){
-    var h=hospitals[hi];
-    mh+='<tr>';
-    mh+='<td style="padding:8px 16px;border-bottom:1px solid var(--bdr);color:var(--tx);font-weight:500;white-space:nowrap;font-size:13px">'+h.name+'</td>';
-    for(var pi=0;pi<allP.length;pi++){
-      var sh2=null;
-      for(var si=0;si<h.sheets.length;si++)if(h.sheets[si].product===allP[pi]){sh2=h.sheets[si];break;}
-      if(!sh2){
-        mh+='<td style="padding:8px 14px;border-bottom:1px solid var(--bdr);text-align:center"><span style="color:var(--bdr);font-size:18px;letter-spacing:-.05em">—</span></td>';
-        continue;
-      }
-      var oc=0,pc2=0,dc=0,tot=sh2.issues.length;
-      for(var k=0;k<sh2.issues.length;k++){var ss=sh2.issues[k].status;if(ss==='รอดำเนินการ')oc++;else if(ss==='กำลังแก้ไข')pc2++;else if(ss==='เสร็จแล้ว')dc++;}
-      var rt=tot?Math.round(dc/tot*100):0;
-      var dotC=oc>0?'#f04060':dc===tot&&tot>0?'#22c97a':'#f5a623';
-      var bgC=oc>0?'rgba(240,64,96,.08)':dc===tot&&tot>0?'rgba(34,201,122,.08)':'rgba(245,166,35,.07)';
-      mh+='<td style="padding:6px 14px;border-bottom:1px solid var(--bdr);text-align:center">'
-        +'<div style="display:inline-block;background:'+bgC+';border:1px solid '+dotC+'30;border-radius:8px;padding:7px 12px;min-width:80px">'
-        +'<div style="display:flex;align-items:center;justify-content:center;gap:5px;margin-bottom:4px">'
-        +'<span style="width:7px;height:7px;border-radius:50%;background:'+dotC+';flex-shrink:0;box-shadow:0 0 6px '+dotC+'80"></span>'
-        +'<span style="font-family:var(--mono);font-size:16px;font-weight:700;color:var(--tx)">'+tot+'</span>'
-        +'</div>'
-        +'<div style="font-size:10px;font-family:var(--mono);color:var(--tx3);line-height:1.4">'
-        +(oc>0?'<span style="color:#f04060;font-weight:600">'+oc+' รอ</span>  ':'')+rt+'%'
-        +'</div></div></td>';
-    }
-    mh+='</tr>';
-  }
-  mh+='</tbody></table></div>';
-  document.getElementById('prodMatrix').innerHTML=mh;
-
-  // ── Hospital completion rate chart ──
-  var hospRateData=[];
-  for(var hi=0;hi<hospitals.length;hi++){
-    var h=hospitals[hi];
-    var hTot=0,hDone=0,hOpen=0;
-    for(var si=0;si<h.sheets.length;si++){
-      for(var ki=0;ki<h.sheets[si].issues.length;ki++){
-        hTot++;
-        var ss=h.sheets[si].issues[ki].status;
-        if(ss==='เสร็จแล้ว')hDone++;
-        if(ss==='รอดำเนินการ')hOpen++;
-      }
-    }
-    if(hTot>0)hospRateData.push({name:h.name,total:hTot,done:hDone,open:hOpen,rate:Math.round(hDone/hTot*100)});
-  }
-  hospRateData.sort(function(a,b){return a.rate-b.rate;});
-  dk('cHospRate');
-  var hrEl=document.getElementById('cHospRate');
-  if(hrEl&&hospRateData.length){
-    charts.cHospRate=new Chart(hrEl,{type:'bar',
-      data:{labels:hospRateData.map(function(x){return x.name;}),
-        datasets:[
-          {label:'รอดำเนินการ',data:hospRateData.map(function(x){return x.open;}),backgroundColor:'rgba(240,64,96,.75)',borderSkipped:false,stack:'s'},
-          {label:'อื่นๆ',data:hospRateData.map(function(x){return x.total-x.done-x.open;}),backgroundColor:'rgba(99,132,180,.3)',borderSkipped:false,stack:'s'},
-          {label:'เสร็จแล้ว',data:hospRateData.map(function(x){return x.done;}),backgroundColor:'rgba(34,201,122,.75)',borderSkipped:false,stack:'s'}
-        ]},
-      options:{indexAxis:'y',responsive:true,maintainAspectRatio:false,
-        plugins:{legend:{labels:{color:'#8899bb',font:{size:11,family:'IBM Plex Mono'},boxWidth:8,padding:12}},
-          tooltip:{callbacks:{footer:function(items){var d=hospRateData[items[0].dataIndex];return'แก้ไขแล้ว '+d.rate+'% ('+d.done+'/'+d.total+')';}}}},
-        scales:{x:{stacked:true,ticks:{color:'#8899bb',font:{size:11}},grid:{color:'rgba(99,132,180,.08)'}},
-                y:{stacked:true,ticks:{color:'#8899bb',font:{size:11}}}},
-        onClick:function(e,items){
-          if(!items.length)return;
-          var d=hospRateData[items[0].index];
-          showChartPopup('ภาพรวม: '+d.name,buildHospPopup(d.name));
-        }}
-    });
-  }
-  // ── Add click handlers to existing charts ──
-  if(charts.cProdStatus){
-    charts.cProdStatus.options.onClick=function(e,items){
-      if(!items.length)return;
-      var prod=prods[items[0].index];
-      var stat=['รอดำเนินการ','กำลังแก้ไข','รอตอบกลับ','เสร็จแล้ว'][items[0].datasetIndex];
-      var filtered=allIssues.filter(function(x){return x.product===prod&&x.status===stat;});
-      showChartPopup(prod+' — '+stat+' ('+filtered.length+')',buildIssueListPopup(filtered));
-    };
-    charts.cProdStatus.update();
-  }
-  if(charts.cProdType){
-    charts.cProdType.options.onClick=function(e,items){
-      if(!items.length)return;
-      var prod=prods[items[0].index];
-      var tp=topT[items[0].datasetIndex];
-      var filtered=allIssues.filter(function(x){return x.product===prod&&x.type===tp;});
-      showChartPopup(prod+' — '+tp+' ('+filtered.length+')',buildIssueListPopup(filtered));
-    };
-    charts.cProdType.update();
-  }
-}
-
-function buildHospPopup(hospName){
-  var hosp=null;for(var i=0;i<hospitals.length;i++)if(hospitals[i].name===hospName){hosp=hospitals[i];break;}
-  if(!hosp)return '';
-  var issues=[];for(var j=0;j<hosp.sheets.length;j++)issues=issues.concat(hosp.sheets[j].issues);
-  return buildIssueListPopup(issues);
-}
-function buildIssueListPopup(issues){
-  if(!issues.length)return '<div class="empty">ไม่มีรายการ</div>';
-  var h='<div style="font-size:11px;font-family:var(--mono);color:var(--tx3);margin-bottom:10px">'+issues.length+' รายการ</div>';
-  for(var i=0;i<Math.min(issues.length,50);i++){
-    var x=issues[i];
-    var pc=pillClass(x.status);
-    h+='<div style="padding:8px 0;border-bottom:1px solid var(--bdr);display:flex;align-items:flex-start;gap:8px">';
-    h+='<span class="pill '+pc+'" style="font-size:9px;flex-shrink:0">'+x.status+'</span>';
-    h+='<div style="flex:1;min-width:0">';
-    h+='<div style="font-size:12px;color:var(--tx);font-weight:500;white-space:normal">'+escHtml(x.topic||'—')+'</div>';
-    if(x.hospital||x.product)h+='<div style="font-size:10px;font-family:var(--mono);color:var(--tx3);margin-top:2px">'+(x.hospital?escHtml(x.hospital)+' · ':'')+escHtml(x.product||'')+'</div>';
-    if(x.dept)h+='<div style="font-size:10px;font-family:var(--mono);color:var(--tx3)">'+escHtml(x.dept)+'</div>';
-    h+='</div></div>';
-  }
-  if(issues.length>50)h+='<div style="font-size:11px;font-family:var(--mono);color:var(--tx3);margin-top:8px">...และอีก '+(issues.length-50)+' รายการ</div>';
-  return h;
-}
-function showChartPopup(title,body){
-  document.getElementById('cpTitle').textContent=title;
-  document.getElementById('cpBody').innerHTML=body;
-  document.getElementById('chartPopup').style.display='flex';
-}
-function closeChartPopup(){document.getElementById('chartPopup').style.display='none';}
-
-/* ── Timeline ── */
-function renderTimeline(){
-  if(!allIssues.length)return;
-  var dated=[];for(var i=0;i<allIssues.length;i++)if(allIssues[i].dateObj)dated.push(allIssues[i]);
-  if(!dated.length){document.getElementById('weekBars').innerHTML='<div class="empty">ไม่พบวันที่ที่อ่านได้ — ตรวจสอบ Column Mapping</div>';return;}
-  var wm={};
-  for(var i=0;i<dated.length;i++){
-    var x=dated[i],wk=x.weekKey;
-    if(!wm[wk])wm[wk]={key:wk,label:x.weekLabel,dateObj:x.dateObj,total:0,open:0,prog:0,done:0};
-    wm[wk].total++;
-    if(x.status==='รอดำเนินการ')wm[wk].open++;
-    else if(x.status==='กำลังแก้ไข')wm[wk].prog++;
-    else if(x.status==='เสร็จแล้ว')wm[wk].done++;
-  }
-  var wks=[];for(var k in wm)wks.push(wm[k]);
-  wks.sort(function(a,b){return new Date(a.key)-new Date(b.key);});
-  if(wks.length>12)wks=wks.slice(wks.length-12);
-  var labels=wks.map(function(w){return w.label;});
-  dk('cTimeline');
-  charts.cTimeline=new Chart(document.getElementById('cTimeline'),{type:'line',data:{labels:labels,datasets:[{label:'รอดำเนินการ',data:wks.map(function(w){return w.open;}),borderColor:'#f04060',backgroundColor:'rgba(240,64,96,.08)',tension:.4,fill:true,pointRadius:4,pointHoverRadius:6,borderWidth:2},{label:'กำลังแก้ไข',data:wks.map(function(w){return w.prog;}),borderColor:'#f5a623',backgroundColor:'rgba(245,166,35,.05)',tension:.4,fill:false,pointRadius:4,pointHoverRadius:6,borderWidth:2,borderDash:[5,3]},{label:'เสร็จแล้ว',data:wks.map(function(w){return w.done;}),borderColor:'#22c97a',backgroundColor:'rgba(34,201,122,.05)',tension:.4,fill:false,pointRadius:4,pointHoverRadius:6,borderWidth:2},{label:'รวม',data:wks.map(function(w){return w.total;}),borderColor:'#3d8ef8',backgroundColor:'rgba(61,142,248,.04)',tension:.4,fill:false,pointRadius:3,pointHoverRadius:5,borderWidth:1.5,borderDash:[2,2]}]},options:{responsive:true,maintainAspectRatio:false,interaction:{mode:'index',intersect:false},plugins:{legend:{labels:{color:'#8899bb',font:{size:11,family:'IBM Plex Mono'},boxWidth:10}}},scales:{x:{ticks:{color:'#8899bb',font:{size:11},autoSkip:false,maxRotation:40},grid:{color:'rgba(99,132,180,.06)'}},y:{min:0,ticks:{color:'#8899bb',stepSize:1},grid:{color:'rgba(99,132,180,.08)'}}}}});
-  var mx=1;for(var i=0;i<wks.length;i++)if(wks[i].total>mx)mx=wks[i].total;
-  var rev=wks.slice().reverse();
-  var bars='';
-  for(var i=0;i<rev.length;i++){
-    var w=rev[i];
-    var rate=Math.round(w.done/w.total*100);
-    var rc=rate>=60?'#22c97a':rate>=30?'#f5a623':'#f04060';
-    bars+='<div class="week-bar"><div class="week-lbl">'+w.label+'</div><div class="week-track"><div class="week-seg" style="width:'+Math.round(w.open/mx*100)+'%;background:var(--rd)"></div><div class="week-seg" style="width:'+Math.round(w.prog/mx*100)+'%;background:var(--am)"></div><div class="week-seg" style="width:'+Math.round(w.done/mx*100)+'%;background:var(--gr)"></div></div><div class="week-nums"><span>'+w.total+' รวม</span><span style="color:'+rc+';font-weight:600">'+rate+'%</span></div></div>';
-  }
-  document.getElementById('weekBars').innerHTML=bars||'<div class="empty">ไม่มีข้อมูล</div>';
-}
-
-/* ── Issue Card ── */
-function pillClass(s){if(s==='รอดำเนินการ')return 'pill-open';if(s==='กำลังแก้ไข')return 'pill-prog';if(s==='เสร็จแล้ว')return 'pill-done';return 'pill-wait';}
-function icClass(s){if(s==='รอดำเนินการ')return 'ic-open';if(s==='กำลังแก้ไข')return 'ic-prog';if(s==='เสร็จแล้ว')return 'ic-done';return 'ic-wait';}
-function buildCard(x,showHosp){
-  var pc=pillClass(x.status),cc=icClass(x.status);
-  var raw=x.rawStatus||x.status;
-  var h='<div class="ic '+cc+'">';
-
-  // ── header bar ──
-  h+='<div class="ic-head">';
-  if(x.sequence)h+='<span class="ic-seq">#'+x.sequence+'</span>';
-  h+='<span class="pill '+pc+'">'+raw+'</span>';
-  if(x.date&&x.date!=='—')h+='<span class="ic-date">'+x.date+'</span>';
-  if(x.type&&x.type!=='ไม่ระบุ')h+='<span class="pill pill-type">'+x.type+'</span>';
-  if(x.product)h+='<span class="prod-badge" style="font-size:9px;padding:1px 6px">'+x.product+'</span>';
-  if(showHosp&&x.hospital)h+='<span class="ic-hosp">'+x.hospital+'</span>';
-  h+='</div>';
-
-  // ── problem + fix (2-col label-value grid) ──
-  h+='<div class="ic-body">';
-  h+='<span class="ic-bl">ปัญหา</span>';
-  h+='<span class="ic-bv">'+(x.topic||'—')+'</span>';
-  if(x.fixMethod){
-    h+='<div class="ic-divider"></div>';
-    h+='<span class="ic-bl">วิธีแก้ไข</span>';
-    h+='<span class="ic-bv ic-fix">'+x.fixMethod+'</span>';
-  }
-  h+='</div>';
-
-  // ── meta footer ──
-  var hasMeta=(x.dept&&x.dept!=='—')||(x.reporter&&x.reporter!=='—')||(x.assignee&&x.assignee!=='—')||(x.resolver&&x.resolver!=='—')||x.resolvedDate;
-  if(hasMeta){
-    h+='<div class="ic-meta">';
-    if(x.dept&&x.dept!=='—')h+='<div class="ic-m"><div class="ic-ml">หน่วยงาน</div><div class="ic-mv">'+x.dept+'</div></div>';
-    if(x.reporter&&x.reporter!=='—')h+='<div class="ic-m"><div class="ic-ml">ผู้แจ้ง</div><div class="ic-mv">'+x.reporter+'</div></div>';
-    if(x.assignee&&x.assignee!=='—')h+='<div class="ic-m"><div class="ic-ml">ผู้รับ</div><div class="ic-mv">'+x.assignee+'</div></div>';
-    if(x.resolver&&x.resolver!=='—')h+='<div class="ic-m"><div class="ic-ml">ผู้แก้ไข</div><div class="ic-mv">'+x.resolver+'</div></div>';
-    if(x.resolvedDate)h+='<div class="ic-m"><div class="ic-ml">วันแก้ไข</div><div class="ic-mv ic-date">'+x.resolvedDate+'</div></div>';
-    h+='</div>';
-  }
-
-  h+='</div>';
-  return h;
-}
-/* ── By Hosp ── */
-function renderByHosp(){
-  var el=document.getElementById('byHospCont');
-  if(!hospitals.length){el.innerHTML='<div class="empty"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/></svg>ดึงข้อมูลก่อน</div>';return;}
-  var hasAny=false;for(var i=0;i<hospitals.length;i++)for(var j=0;j<hospitals[i].sheets.length;j++)if(hospitals[i].sheets[j].issues.length){hasAny=true;break;}
-  if(!hasAny){el.innerHTML='<div class="empty">ยังไม่มีข้อมูล — กด "ดึงข้อมูล" ก่อน</div>';return;}
-  // populate filter dropdown
-  var fsel=document.getElementById('fBHosp');
-  if(fsel){
-    var cur=fsel.value;
-    var opt='<option value="">โรงพยาบาลทั้งหมด</option>';
-    for(var i=0;i<hospitals.length;i++)opt+='<option'+(hospitals[i].name===cur?' selected':'')+'>'+hospitals[i].name+'</option>';
-    fsel.innerHTML=opt;
-  }
-  var filterH=fsel?fsel.value:'';
-  // summary
-  var filteredH=hospitals.filter(function(h){return !filterH||h.name===filterH;});
-  var sumEl=document.getElementById('bhSummary');
-  if(sumEl)sumEl.textContent=filteredH.length+' โรงพยาบาล';
-
-  var PCOLORS={'HOSxP XE':'#3d8ef8','ระบบคลังสินค้า':'#22c97a','ระบบครุภัณฑ์':'#f5a623','ระบบบัญชี Account':'#8870f8','IPD Paperless':'#18c8c8'};
-  var html='';
-
-  for(var i=0;i<filteredH.length;i++){
-    var h=filteredH[i];
-    var allIss=[];
-    for(var j=0;j<h.sheets.length;j++)allIss=allIss.concat(h.sheets[j].issues);
-    if(!allIss.length)continue;
-
-    // totals
-    var totOpen=0,totProg=0,totWait=0,totDone=0;
-    for(var k=0;k<allIss.length;k++){
-      var s=allIss[k].status;
-      if(s==='รอดำเนินการ')totOpen++;
-      else if(s==='กำลังแก้ไข')totProg++;
-      else if(s==='รอตอบกลับ')totWait++;
-      else if(s==='เสร็จแล้ว')totDone++;
-    }
-    var rate=Math.round(totDone/allIss.length*100);
-    var rc=rate>=70?'var(--gr)':rate>=40?'var(--am)':'var(--rd)';
-
-    html+='<div class="hov-card">';
-    // header
-    html+='<div class="hov-hdr">';
-    html+='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16" style="color:var(--tx3);flex-shrink:0"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>';
-    html+='<h3>'+escHtml(h.name)+'</h3>';
-    html+='<span style="font-size:11px;font-family:var(--mono);color:var(--tx3)">'+allIss.length+' รายการ &bull; '+h.sheets.filter(function(s){return s.issues.length>0;}).length+' Product</span>';
-    // mini status pills
-    if(totOpen)html+='<span class="pill pill-open">รอ '+totOpen+'</span>';
-    if(totProg)html+='<span class="pill pill-prog">แก้ '+totProg+'</span>';
-    if(totWait)html+='<span class="pill pill-wait">รอตอบ '+totWait+'</span>';
-    if(totDone)html+='<span class="pill pill-done">เสร็จ '+totDone+'</span>';
-    html+='<span class="hov-rate" style="color:'+rc+'">'+rate+'%</span>';
-    html+='</div>';
-
-    html+='<div class="hov-body">';
-
-    // per-product rows
-    for(var j=0;j<h.sheets.length;j++){
-      var sh=h.sheets[j];
-      if(!sh.issues.length)continue;
-      var pCol=PCOLORS[sh.product]||'#8899bb';
-      var pOpen=0,pProg=0,pWait=0,pDone=0;
-      for(var k=0;k<sh.issues.length;k++){
-        var ps=sh.issues[k].status;
-        if(ps==='รอดำเนินการ')pOpen++;
-        else if(ps==='กำลังแก้ไข')pProg++;
-        else if(ps==='รอตอบกลับ')pWait++;
-        else if(ps==='เสร็จแล้ว')pDone++;
-      }
-      var pTotal=sh.issues.length;
-      var wOpen=pTotal?Math.round(pOpen/pTotal*100):0;
-      var wProg=pTotal?Math.round(pProg/pTotal*100):0;
-      var wWait=pTotal?Math.round(pWait/pTotal*100):0;
-      var wDone=pTotal?Math.round(pDone/pTotal*100):0;
-      // fix rounding
-      var wSum=wOpen+wProg+wWait+wDone;
-      if(wSum<100&&pDone)wDone+=100-wSum;
-      else if(wSum<100&&pOpen)wOpen+=100-wSum;
-
-      html+='<div class="hov-prod-row">';
-      html+='<div class="hov-prod-name"><span class="hov-prod-dot" style="background:'+pCol+'"></span><span class="hov-prod-label">'+escHtml(sh.product)+'</span><span class="hov-prod-cnt">'+pTotal+'</span></div>';
-      html+='<div class="hov-sbar">';
-      if(wOpen)html+='<div class="hov-sbar-seg" style="width:'+wOpen+'%;background:var(--rd);opacity:.85" title="รอดำเนินการ '+pOpen+'"></div>';
-      if(wProg)html+='<div class="hov-sbar-seg" style="width:'+wProg+'%;background:var(--am);opacity:.85" title="กำลังแก้ไข '+pProg+'"></div>';
-      if(wWait)html+='<div class="hov-sbar-seg" style="width:'+wWait+'%;background:var(--tl);opacity:.85" title="รอตอบกลับ '+pWait+'"></div>';
-      if(wDone)html+='<div class="hov-sbar-seg" style="width:'+wDone+'%;background:var(--gr);opacity:.85" title="เสร็จแล้ว '+pDone+'"></div>';
-      html+='</div>';
-      // stat counts
-      html+='<div class="hov-stat-pills">';
-      if(pOpen)html+='<span style="font-size:10px;font-family:var(--mono);color:var(--rd)">รอ '+pOpen+'</span>';
-      if(pProg)html+='<span style="font-size:10px;font-family:var(--mono);color:var(--am)">แก้ '+pProg+'</span>';
-      if(pWait)html+='<span style="font-size:10px;font-family:var(--mono);color:var(--tl)">รอตอบ '+pWait+'</span>';
-      if(pDone)html+='<span style="font-size:10px;font-family:var(--mono);color:var(--gr)">เสร็จ '+pDone+'</span>';
-      html+='</div>';
-      html+='</div>';
-    }
-
-    // department breakdown
-    var deptMap={};
-    for(var k=0;k<allIss.length;k++){
-      var d=allIss[k].dept;
-      if(d)deptMap[d]=(deptMap[d]||0)+1;
-    }
-    var depts=[];for(var dk in deptMap)depts.push([dk,deptMap[dk]]);
-    depts.sort(function(a,b){return b[1]-a[1];});
-    if(depts.length){
-      var maxDept=depts[0][1];
-      html+='<div class="hov-dept-section">';
-      html+='<div class="hov-dept-header">หน่วยงานที่แจ้งปัญหา ('+depts.length+')</div>';
-      html+='<div class="hov-dept-grid">';
-      for(var di=0;di<depts.length;di++){
-        var barW=Math.max(4,Math.round(depts[di][1]/maxDept*100));
-        html+='<div class="hov-dept-item">';
-        html+='<span class="hov-dept-name" title="'+escHtml(depts[di][0])+'">'+escHtml(depts[di][0])+'</span>';
-        html+='<div class="hov-dept-bar-wrap"><div class="hov-dept-bar-fill" style="width:'+barW+'%"></div></div>';
-        html+='<span class="hov-dept-num">'+depts[di][1]+'</span>';
-        html+='</div>';
-      }
-      html+='</div></div>';
-    }
-
-    html+='</div></div>'; // hov-body + hov-card
-  }
-
-  el.innerHTML=html||'<div class="empty">ยังไม่มีข้อมูล</div>';
-}
-
-/* ── All ── */
-function buildSubFilters(src){
-  var pm={},de={},ty={},st={},wk={};
-  for(var i=0;i<src.length;i++){
-    var x=src[i];
-    if(x.product)pm[x.product]=1;
-    if(x.dept)de[x.dept]=1;
-    if(x.type)ty[x.type]=1;
-    if(x.rawStatus)st[x.rawStatus]=1;
-    if(x.weekKey)wk[x.weekKey]=1;
-  }
-  var pa=Object.keys(pm).sort(),da=Object.keys(de).sort(),ta=Object.keys(ty).sort(),sa=Object.keys(st).sort(),wa=Object.keys(wk).sort();
-  var pSel=document.getElementById('fProduct'),dSel=document.getElementById('fDept'),tSel=document.getElementById('fType'),sSel=document.getElementById('fStatus'),wSel=document.getElementById('fWeek');
-  var pv=pSel.value,dv=dSel.value,tv=tSel.value,sv=sSel.value,wv=wSel.value;
-  pSel.innerHTML='<option value="">Product ทั้งหมด</option>'+pa.map(function(v){return'<option'+(v===pv?' selected':'')+'>'+v+'</option>';}).join('');
-  dSel.innerHTML='<option value="">หน่วยงานทั้งหมด</option>'+da.map(function(v){return'<option'+(v===dv?' selected':'')+'>'+v+'</option>';}).join('');
-  tSel.innerHTML='<option value="">กลุ่มปัญหาทั้งหมด</option>'+ta.map(function(v){return'<option'+(v===tv?' selected':'')+'>'+v+'</option>';}).join('');
-  sSel.innerHTML='<option value="">สถานะทั้งหมด</option>'+sa.map(function(v){return'<option'+(v===sv?' selected':'')+'>'+v+'</option>';}).join('');
-  wSel.innerHTML='<option value="">สัปดาห์ทั้งหมด</option>'+wa.map(function(v){return'<option value="'+v+'"'+(v===wv?' selected':'')+'>'+weekLabel(v)+'</option>';}).join('');
-}
-function populateFilters(){
-  var hs=document.getElementById('fHosp');
-  var hhtml='<option value="">โรงพยาบาลทั้งหมด</option>';
-  for(var i=0;i<hospitals.length;i++)hhtml+='<option>'+hospitals[i].name+'</option>';
-  hs.innerHTML=hhtml;
-  buildSubFilters(allIssues);
-}
-function onHospFilterChange(){
-  var fh=document.getElementById('fHosp').value;
-  var src=fh?allIssues.filter(function(x){return x.hospital===fh;}):allIssues;
-  // reset sub-filters that don't match new hospital
-  buildSubFilters(src);
-  renderAll();
-}
-function renderAll(){
-  var fh=document.getElementById('fHosp').value,fp=document.getElementById('fProduct').value,ft=document.getElementById('fType').value,fd=document.getElementById('fDept').value,fs=document.getElementById('fStatus').value,fw=document.getElementById('fWeek').value;
-  var iss=[];
-  for(var i=0;i<allIssues.length;i++){
-    var x=allIssues[i];
-    if(fh&&x.hospital!==fh)continue;
-    if(fp&&x.product!==fp)continue;
-    if(ft&&x.type!==ft)continue;
-    if(fd&&x.dept!==fd)continue;
-    if(fs&&x.rawStatus!==fs)continue;
-    if(fw&&x.weekKey!==fw)continue;
-    iss.push(x);
-  }
-  // update filter stats strip
-  var sc=document.getElementById('fstatStrip');
-  if(sc){
-    var stOpen=0,stProg=0,stWait=0,stDone=0;
-    for(var i=0;i<iss.length;i++){
-      var s=iss[i].status;
-      if(s==='รอดำเนินการ')stOpen++;
-      else if(s==='กำลังแก้ไข')stProg++;
-      else if(s==='รอตอบกลับ')stWait++;
-      else if(s==='เสร็จแล้ว')stDone++;
-    }
-    var rate=iss.length?Math.round(stDone/iss.length*100):0;
-    document.getElementById('fst-total').textContent=iss.length;
-    document.getElementById('fst-open').textContent=stOpen;
-    document.getElementById('fst-prog').textContent=stProg;
-    document.getElementById('fst-wait').textContent=stWait;
-    document.getElementById('fst-done').textContent=stDone;
-    document.getElementById('fst-rate').textContent=rate+'%';
-    sc.style.display=allIssues.length?'flex':'none';
-  }
-  var el=document.getElementById('allCont');
-  if(!iss.length){el.innerHTML='<div class="empty">ไม่พบรายการที่ตรงเงื่อนไข</div>';return;}
-  var html='';
-  for(var i=0;i<iss.length;i++)html+=buildCard(iss[i],hospitals.length>1);
-  el.innerHTML=html;
-}
-
-/* ── Column Mapping ── */
-function openMap(){
-  var el=document.getElementById('mapFields');
-  var html='';
-  for(var i=0;i<MAP_FIELDS.length;i++){
-    var f=MAP_FIELDS[i];
-    html+='<div class="field"><label>'+f.label+'</label><input id="mc_'+f.key+'" value="'+(colMap[f.key]||'')+'" placeholder="ชื่อคอลัมน์ (คั่นด้วย ,)"></div>';
-  }
-  el.innerHTML=html;
-  document.getElementById('mapDone').value=statusDone;
-  document.getElementById('mapProg').value=statusProg;
-  document.getElementById('mapWait').value=statusWait;
-  renderStatusChips();
-  var hdrEl=document.getElementById('detectedHdrBox');
-  var hnames=Object.keys(allDetectedHeaders);
-  if(hnames.length){
-    hdrEl.style.display='';
-    var hdrHtml='';
-    for(var hi=0;hi<hnames.length;hi++){
-      var hn=hnames[hi];
-      hdrHtml+='<div style="margin-bottom:6px">'
-        +'<span style="font-size:10px;color:var(--tl);font-family:var(--mono)">'+hn+'</span>'
-        +'<div style="margin-top:3px;font-size:12px;color:var(--ac);word-break:break-all">'+allDetectedHeaders[hn].join('  |  ')+'</div>'
-        +'</div>';
-    }
-    document.getElementById('detectedHdrList').innerHTML=hdrHtml;
-  }else if(lastDetectedHeaders.length){
-    hdrEl.style.display='';
-    document.getElementById('detectedHdrList').textContent=lastDetectedHeaders.join('  |  ');
-  }else{
-    hdrEl.style.display='none';
-  }
-  document.getElementById('mapModal').style.display='flex';
-}
-function closeMap(){document.getElementById('mapModal').style.display='none';}
-function bgClose(e){if(e.target.id==='mapModal')closeMap();}
-function getChipGroup(val){
-  var v=val.toLowerCase();
-  if(document.getElementById('mapDone').value.toLowerCase().split(',').some(function(x){return x.trim()===v;}))return 'done';
-  if(document.getElementById('mapProg').value.toLowerCase().split(',').some(function(x){return x.trim()===v;}))return 'prog';
-  if(document.getElementById('mapWait').value.toLowerCase().split(',').some(function(x){return x.trim()===v;}))return 'wait';
-  return 'open';
-}
-function toggleStatusChip(val){
-  var cur=getChipGroup(val);
-  var next={open:'done',done:'prog',prog:'wait',wait:'open'}[cur];
-  var fields={done:'mapDone',prog:'mapProg',wait:'mapWait'};
-  // remove from all groups
-  Object.keys(fields).forEach(function(g){
-    var inp=document.getElementById(fields[g]);
-    var arr=inp.value.split(',').map(function(x){return x.trim();}).filter(function(x){return x&&x.toLowerCase()!==val.toLowerCase();});
-    inp.value=arr.join(',');
-  });
-  // add to new group (if not "open")
-  if(next!=='open'){
-    var inp=document.getElementById(fields[next]);
-    var arr=inp.value.split(',').map(function(x){return x.trim();}).filter(Boolean);
-    arr.push(val);
-    inp.value=arr.join(',');
-  }
-  renderStatusChips();
-}
-function renderStatusChips(){
-  var box=document.getElementById('statusChipBox');
-  var container=document.getElementById('statusChips');
-  if(!lastDetectedStatuses.length){box.style.display='none';return;}
-  box.style.display='';
-  var colors={done:'var(--gr)',prog:'var(--am)',wait:'var(--tl)',open:'var(--tx3)'};
-  var labels={done:'เสร็จแล้ว',prog:'กำลังแก้ไข',wait:'รอตอบกลับ',open:'รอดำเนินการ'};
-  var html='';
-  for(var i=0;i<lastDetectedStatuses.length;i++){
-    var v=lastDetectedStatuses[i];
-    var g=getChipGroup(v);
-    html+='<span onclick="toggleStatusChip(\''+v.replace(/'/g,"\\'")+'\')" style="cursor:pointer;display:inline-flex;align-items:center;gap:5px;padding:4px 10px;border-radius:9999px;font-size:12px;font-family:var(--mono);border:1px solid '+colors[g]+';color:'+colors[g]+';background:rgba(0,0,0,.2);user-select:none">'
-      +'<span style="width:7px;height:7px;border-radius:50%;background:'+colors[g]+';flex-shrink:0"></span>'+v
-      +'</span>';
-  }
-  container.innerHTML=html;
-}
-function autoMap(){
-  var hnames=Object.keys(allDetectedHeaders);
-  if(!hnames.length&&!lastDetectedHeaders.length){toast('โหลดข้อมูลจากชีตก่อน','error');return;}
-  var allSets=hnames.length
-    ? hnames.map(function(k){return allDetectedHeaders[k];})
-    : [lastDetectedHeaders];
-  var mapped=0;
-  for(var i=0;i<MAP_FIELDS.length;i++){
-    var f=MAP_FIELDS[i];
-    var inp=document.getElementById('mc_'+f.key);
-    if(!inp)continue;
-    var label=f.label.replace(/\s*\*/,'').trim().toLowerCase();
-    var foundVals=[];
-    for(var s=0;s<allSets.length;s++){
-      var raw=allSets[s];
-      var low=raw.map(function(h){return h.toLowerCase();});
-      var idx=-1;
-      // 1) exact label
-      for(var j=0;j<low.length;j++)if(low[j]===label){idx=j;break;}
-      // 2) exact current colMap value
-      if(idx<0)idx=findCol(low,colMap[f.key]);
-      // 3) header contains label (≥3 chars)
-      if(idx<0)for(var j=0;j<low.length;j++)if(label.length>=3&&low[j].indexOf(label)>=0){idx=j;break;}
-      // 4) label contains header (≥3 chars)
-      if(idx<0)for(var j=0;j<low.length;j++)if(low[j].length>=3&&label.indexOf(low[j])>=0){idx=j;break;}
-      if(idx>=0){
-        var val=raw[idx];
-        if(foundVals.indexOf(val)<0)foundVals.push(val);
-      }
-    }
-    if(foundVals.length){inp.value=foundVals.join(',');mapped++;}
-  }
-  toast('จับคู่ได้ '+mapped+'/'+MAP_FIELDS.length+' คอลัมน์ จาก '+allSets.length+' Sheet — ตรวจสอบแล้วกด บันทึก','success');
-}
-function saveMap(){
-  for(var i=0;i<MAP_FIELDS.length;i++)colMap[MAP_FIELDS[i].key]=document.getElementById('mc_'+MAP_FIELDS[i].key).value;
-  statusDone=document.getElementById('mapDone').value;
-  statusProg=document.getElementById('mapProg').value;
-  statusWait=document.getElementById('mapWait').value;
-  saveState();
-  closeMap();
-  if(allIssues.length){updateMetrics();renderCharts();renderTimeline();renderByHosp();renderAll();}
-  toast('บันทึก Column Mapping แล้ว','success');
-}
-
-/* ── Toast ── */
-function toast(msg,type){
-  var el=document.createElement('div');
-  el.className='toast '+(type||'');
-  var ic=type==='success'?'&#10003;':type==='error'?'&#10007;':'&#9432;';
-  var ic_color=type==='success'?'var(--gr)':type==='error'?'var(--rd)':'var(--ac)';
-  el.innerHTML='<span style="color:'+ic_color+'">'+ic+'</span> '+msg;
-  document.getElementById('toastWrap').appendChild(el);
-  setTimeout(function(){el.style.opacity='0';el.style.transform='translateY(6px)';el.style.transition='.3s';setTimeout(function(){if(el.parentNode)el.parentNode.removeChild(el);},300);},3000);
-}
-
-/* ── Responsive ── */
-function checkResp(){
-  var btn=document.getElementById('menuBtn');
-  if(window.innerWidth<900){btn.style.display='';}
-  else{btn.style.display='none';document.getElementById('sidebar').classList.remove('open');}
-}
-window.addEventListener('resize',checkResp);
-checkResp();
-</script>
 </body>
 </html>
