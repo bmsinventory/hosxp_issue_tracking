@@ -114,9 +114,10 @@ function renderByHosp() {
     }
     var rate = Math.round(totDone / allIss.length * 100);
     var rc   = rate >= 70 ? 'var(--gr)' : rate >= 40 ? 'var(--am)' : 'var(--rd)';
+    var _hn  = h.name.replace(/\\/g, '\\\\').replace(/'/g, "\\'");
 
     html += '<div class="hov-card">';
-    html += '<div class="hov-hdr">';
+    html += '<div class="hov-hdr hov-clickable" onclick="showHospProdPopup(\'' + _hn + '\',null)" title="ดูรายการทั้งหมด — ' + escHtml(h.name) + '">';
     html += '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16" style="color:var(--tx3);flex-shrink:0"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>';
     html += '<h3>' + escHtml(h.name) + '</h3>';
     html += '<span style="font-size:11px;font-family:var(--mono);color:var(--tx3)">' + allIss.length + ' รายการ &bull; ' + h.sheets.filter(function (s) { return s.issues.length > 0; }).length + ' Product</span>';
@@ -149,7 +150,8 @@ function renderByHosp() {
       if (wSum < 100 && pDone) wDone += 100 - wSum;
       else if (wSum < 100 && pOpen) wOpen += 100 - wSum;
 
-      html += '<div class="hov-prod-row">';
+      var _pn  = sh.product.replace(/\\/g, '\\\\').replace(/'/g, "\\'");
+      html += '<div class="hov-prod-row hov-clickable" onclick="showHospProdPopup(\'' + _hn + '\',\'' + _pn + '\')" title="' + escHtml(h.name) + ' — ' + escHtml(sh.product) + '">';
       html += '<div class="hov-prod-name"><span class="hov-prod-dot" style="background:' + pCol + '"></span><span class="hov-prod-label">' + escHtml(sh.product) + '</span><span class="hov-prod-cnt">' + pTotal + '</span></div>';
       html += '<div class="hov-sbar">';
       if (wOpen) html += '<div class="hov-sbar-seg" style="width:' + wOpen + '%;background:var(--rd);opacity:.85" title="รอดำเนินการ ' + pOpen + '"></div>';
@@ -191,6 +193,22 @@ function renderByHosp() {
     html += '</div></div>';
   }
   el.innerHTML = html || '<div class="empty">ยังไม่มีข้อมูล</div>';
+}
+
+/* ── Hospital × Product Popup ── */
+
+function showHospProdPopup(hospName, product) {
+  var issues = [];
+  for (var i = 0; i < hospitals.length; i++) {
+    if (hospitals[i].name !== hospName) continue;
+    for (var j = 0; j < hospitals[i].sheets.length; j++) {
+      if (!product || hospitals[i].sheets[j].product === product) {
+        issues = issues.concat(hospitals[i].sheets[j].issues);
+      }
+    }
+  }
+  var title = (product ? hospName + ' — ' + product : hospName) + ' (' + issues.length + ' รายการ)';
+  showChartPopup(title, buildIssueListPopup(issues));
 }
 
 /* ── Filters (Cascading) ── */
