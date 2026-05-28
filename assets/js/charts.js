@@ -332,52 +332,92 @@ function renderPopupPage(page) {
   var end        = Math.min(start + POPUP_PAGE_SIZE, issues.length);
   var slice      = issues.slice(start, end);
 
-  // group current page by product
-  var groups = {}, order = [];
+  // ─ Type summary from ALL issues ─
+  var typeTotals = {}, typeOrder = [];
+  for (var i = 0; i < issues.length; i++) {
+    var t = issues[i].type || 'ไม่ระบุกลุ่ม';
+    if (!typeTotals[t]) { typeTotals[t] = 0; typeOrder.push(t); }
+    typeTotals[t]++;
+  }
+  typeOrder.sort(function (a, b) { return typeTotals[b] - typeTotals[a]; });
+
+  // ─ Group current page: Product → Type ─
+  var groups = {}, prodOrder = [];
   for (var i = 0; i < slice.length; i++) {
     var p = slice[i].product || 'ไม่ระบุ Product';
-    if (!groups[p]) { groups[p] = []; order.push(p); }
-    groups[p].push({ iss: slice[i], seq: start + i + 1 });
+    var t = slice[i].type    || 'ไม่ระบุกลุ่ม';
+    if (!groups[p]) { groups[p] = { types: {}, typeOrder: [] }; prodOrder.push(p); }
+    if (!groups[p].types[t]) { groups[p].types[t] = []; groups[p].typeOrder.push(t); }
+    groups[p].types[t].push({ iss: slice[i], seq: start + i + 1 });
   }
-  var singleProd = order.length === 1;
+  var singleProd = prodOrder.length === 1;
 
   var h = '';
 
   // ─ Top bar ─
-  h += '<div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px;margin-bottom:14px">';
+  h += '<div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px;margin-bottom:10px">';
   h += '<span style="font-size:11px;font-family:var(--mono);color:var(--tx3)">'
     + issues.length + ' รายการ · #' + (start + 1) + '–#' + end
     + (totalPages > 1 ? ' · หน้า ' + page + '/' + totalPages : '') + '</span>';
   if (totalPages > 1) h += buildPageBar(page, totalPages);
   h += '</div>';
 
-  // ─ Items grouped by product ─
-  for (var gi = 0; gi < order.length; gi++) {
-    var prod = order[gi];
-    var list = groups[prod];
+  // ─ Type summary strip (full counts, shown when > 1 type) ─
+  if (typeOrder.length > 1) {
+    h += '<div style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:14px;padding:9px 12px;background:var(--bg3);border-radius:var(--r2);border:1px solid var(--bdr)">';
+    for (var ti = 0; ti < typeOrder.length; ti++) {
+      var tk = typeOrder[ti];
+      h += '<span style="display:inline-flex;align-items:center;gap:5px;font-size:11px;font-family:var(--mono);color:var(--tx2)">'
+        + escHtml(tk)
+        + '<span style="background:var(--bg4);color:var(--ac);padding:0 7px;border-radius:99px;font-size:10px;font-weight:700">' + typeTotals[tk] + '</span>'
+        + '</span>';
+      if (ti < typeOrder.length - 1) h += '<span style="color:var(--bdr2)">·</span>';
+    }
+    h += '</div>';
+  }
+
+  // ─ Items: Product → Type sub-groups ─
+  for (var gi = 0; gi < prodOrder.length; gi++) {
+    var prod = prodOrder[gi];
+    var grp  = groups[prod];
     var pCol = PROD_COLORS[prod] || '#8899bb';
 
     if (!singleProd) {
-      h += '<div style="display:flex;align-items:center;gap:8px;margin:' + (gi > 0 ? '18px' : '0') + ' 0 8px">';
+      var prodTotal = 0;
+      for (var ti = 0; ti < grp.typeOrder.length; ti++) prodTotal += grp.types[grp.typeOrder[ti]].length;
+      h += '<div style="display:flex;align-items:center;gap:8px;margin:' + (gi > 0 ? '18px' : '0') + ' 0 6px">';
       h += '<span style="width:8px;height:8px;border-radius:50%;background:' + pCol + ';flex-shrink:0"></span>';
-      h += '<span style="font-size:11px;font-weight:700;font-family:var(--mono);color:' + pCol + '">' + escHtml(prod) + '</span>';
-      h += '<span style="font-size:10px;font-family:var(--mono);color:var(--tx3)">(' + list.length + ')</span>';
+      h += '<span style="font-size:12px;font-weight:700;font-family:var(--mono);color:' + pCol + '">' + escHtml(prod) + '</span>';
+      h += '<span style="background:var(--bg4);color:var(--tx3);padding:0 7px;border-radius:99px;font-size:10px;font-family:var(--mono)">' + prodTotal + '</span>';
       h += '<div style="flex:1;height:1px;background:var(--bdr)"></div></div>';
     }
 
-    for (var i = 0; i < list.length; i++) {
-      var x = list[i].iss, sq = list[i].seq, pc = pillClass(x.status);
-      h += '<div style="padding:7px 0 7px ' + (singleProd ? '0' : '14px') + ';border-bottom:1px solid var(--bdr);display:flex;align-items:flex-start;gap:8px">';
-      h += '<span style="font-size:10px;font-family:var(--mono);color:var(--tx3);min-width:28px;flex-shrink:0;padding-top:3px;text-align:right">' + sq + '.</span>';
-      h += '<span class="pill ' + pc + '" style="font-size:9px;flex-shrink:0">' + x.status + '</span>';
-      h += '<div style="flex:1;min-width:0">';
-      h += '<div style="font-size:13px;color:var(--tx);font-weight:500;white-space:normal">' + escHtml(x.topic || '—') + '</div>';
-      var meta = [];
-      if (x.hospital)              meta.push(escHtml(x.hospital));
-      if (singleProd && x.product) meta.push(escHtml(x.product));
-      if (x.dept)                  meta.push(escHtml(x.dept));
-      if (meta.length) h += '<div style="font-size:10px;font-family:var(--mono);color:var(--tx3);margin-top:3px">' + meta.join(' · ') + '</div>';
-      h += '</div></div>';
+    for (var ti = 0; ti < grp.typeOrder.length; ti++) {
+      var typeName = grp.typeOrder[ti];
+      var typeList = grp.types[typeName];
+      var pInd     = singleProd ? 0 : 14;
+
+      h += '<div style="display:flex;align-items:center;gap:6px;margin:' + (ti > 0 ? '10px' : (singleProd ? '0' : '6px')) + ' 0 5px ' + pInd + 'px">';
+      h += '<span style="width:5px;height:5px;border-radius:50%;background:var(--ac);opacity:.8;flex-shrink:0"></span>';
+      h += '<span style="font-size:11px;font-family:var(--mono);color:var(--tx2);font-weight:600">' + escHtml(typeName) + '</span>';
+      h += '<span style="background:rgba(61,142,248,.12);color:var(--ac);padding:0 8px;border-radius:99px;font-size:10px;font-family:var(--mono);font-weight:700">' + typeList.length + '</span>';
+      h += '<div style="flex:1;height:1px;background:var(--bdr);opacity:.5"></div></div>';
+
+      var iInd = pInd + 12;
+      for (var i = 0; i < typeList.length; i++) {
+        var x = typeList[i].iss, sq = typeList[i].seq, pc = pillClass(x.status);
+        h += '<div style="padding:6px 0 6px ' + iInd + 'px;border-bottom:1px solid var(--bdr);display:flex;align-items:flex-start;gap:8px">';
+        h += '<span style="font-size:10px;font-family:var(--mono);color:var(--tx3);min-width:28px;flex-shrink:0;padding-top:3px;text-align:right">' + sq + '.</span>';
+        h += '<span class="pill ' + pc + '" style="font-size:9px;flex-shrink:0">' + x.status + '</span>';
+        h += '<div style="flex:1;min-width:0">';
+        h += '<div style="font-size:13px;color:var(--tx);font-weight:500;white-space:normal">' + escHtml(x.topic || '—') + '</div>';
+        var meta = [];
+        if (x.hospital)              meta.push(escHtml(x.hospital));
+        if (singleProd && x.product) meta.push(escHtml(x.product));
+        if (x.dept)                  meta.push(escHtml(x.dept));
+        if (meta.length) h += '<div style="font-size:10px;font-family:var(--mono);color:var(--tx3);margin-top:3px">' + meta.join(' · ') + '</div>';
+        h += '</div></div>';
+      }
     }
   }
 
