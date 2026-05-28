@@ -258,17 +258,14 @@ tr:hover td { background: rgba(99,132,180,.04); color: var(--tx); }
 .aging-badge { font-size: 9px; font-family: var(--mono); border: 1px solid; border-radius: 3px; padding: 1px 5px; white-space: nowrap; }
 
 /* ── Search Row (All Issues view) ── */
-.search-row { display: flex; align-items: center; margin-bottom: 6px; }
-.search-wrap { position: relative; flex: 1; }
+.search-row { display: flex; align-items: center; gap: 8px; margin-bottom: 8px; flex-wrap: nowrap; }
+.search-wrap { position: relative; flex: 1; min-width: 0; }
 .search-icon { position: absolute; left: 10px; top: 50%; transform: translateY(-50%); color: var(--tx3); pointer-events: none; flex-shrink: 0; }
 .search-input { width: 100%; padding: 7px 12px 7px 32px; background: var(--bg3); border: 1px solid var(--bdr2); border-radius: var(--r2); color: var(--tx); font-family: var(--sans); font-size: 13px; outline: none; transition: border-color .15s; }
 .search-input:focus { border-color: var(--ac); }
 .search-input::placeholder { color: var(--tx3); }
-
-/* ── Date Row (date range + export buttons) ── */
-.date-row { display: flex; align-items: center; gap: 8px; margin-bottom: 8px; }
 .date-sep { font-size: 11px; color: var(--tx3); white-space: nowrap; flex-shrink: 0; }
-.date-input { background: var(--bg3); border: 1px solid var(--bdr2); border-radius: var(--r2); color: var(--tx2); font-family: var(--mono); font-size: 12px; padding: 6px 8px; outline: none; cursor: pointer; min-height: 36px; transition: border-color .15s; }
+.date-input { background: var(--bg3); border: 1px solid var(--bdr2); border-radius: var(--r2); color: var(--tx2); font-family: var(--mono); font-size: 12px; padding: 6px 8px; outline: none; cursor: pointer; min-height: 36px; width: 138px; flex-shrink: 0; transition: border-color .15s; }
 .date-input:focus { border-color: var(--ac); color: var(--tx); }
 
 /* ── Animations ── */
@@ -318,9 +315,10 @@ tr:hover td { background: rgba(99,132,180,.04); color: var(--tx); }
   .interval-sel { width: 82px; padding: 5px 4px; font-size: 11px; }
   /* prevent iOS auto-zoom on focus */
   input, select, textarea { font-size: 16px; }
-  /* date row: allow wrap */
-  .date-row { flex-wrap: wrap; }
-  .date-input { flex: 1; min-width: 120px; }
+  /* search row: wrap on small screens */
+  .search-row { flex-wrap: wrap; }
+  .search-wrap { min-width: 100%; }
+  .date-input { width: auto; flex: 1; min-width: 120px; }
   /* filter selects: 2 per row */
   .filter-row select { flex: 1 1 calc(50% - 4px); min-width: calc(50% - 4px); }
   /* hospital product rows: wrap vertically */
