@@ -16,7 +16,7 @@ function initSb() {
     return;
   }
   setSbStatus(true);
-  checkAuth(); // verify login before loading data
+  loadHospitalsFromSb();
 }
 
 function setSbStatus(ok) {

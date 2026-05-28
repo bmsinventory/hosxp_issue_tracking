@@ -17,13 +17,26 @@ function setBtnState(btn, text, disabled) {
 
 /* ── Navigation ── */
 
+// Tabs that require admin password
+var ADMIN_TABS = ['hospitals', 'user'];
+
 function gotoTab(id, btn) {
+  if (ADMIN_TABS.indexOf(id) >= 0) {
+    requireAdmin(function () { gotoTabDirect(id, btn); updateLockBtn(); });
+  } else {
+    gotoTabDirect(id, btn);
+  }
+}
+
+function gotoTabDirect(id, btn) {
   document.querySelectorAll('.view').forEach(function (v) { v.classList.remove('active'); });
   document.querySelectorAll('.nav-item').forEach(function (n) { n.classList.remove('active'); });
-  document.getElementById('view-' + id).classList.add('active');
+  var view = document.getElementById('view-' + id);
+  if (view) view.classList.add('active');
   if (btn) btn.classList.add('active');
   document.getElementById('topbarTitle').textContent = TAB_TITLES[id] || id;
   if (window.innerWidth < 900) document.getElementById('sidebar').classList.remove('open');
+  if (id === 'user') renderAdminStatus();
 }
 
 function toggleSB() {

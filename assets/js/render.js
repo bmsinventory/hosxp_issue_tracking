@@ -289,6 +289,9 @@ function renderAll() {
 /* ── Column Mapping Modal ── */
 
 function openMap() {
+  requireAdmin(function () { _openMap(); updateLockBtn(); });
+}
+function _openMap() {
   var el   = document.getElementById('mapFields');
   var html = '';
   for (var i = 0; i < MAP_FIELDS.length; i++) {

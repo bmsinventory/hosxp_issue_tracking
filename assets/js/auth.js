@@ -1,136 +1,113 @@
-/* ── Authentication (Supabase Auth) ── */
+/* ── Admin Password — protects Settings tabs only ── */
 
-var currentUser = null;
+var adminUnlocked = false;
+var ADMIN_PWD_KEY = 'bms-admin-pwd';
 
-/* ── Session Management ── */
+/* ── Helpers ── */
 
-async function checkAuth() {
-  try {
-    var result  = await sbClient.auth.getSession();
-    var session = result.data.session;
-    if (session) {
-      currentUser = session.user;
-      onAuthSuccess();
-    } else {
-      showLoginScreen();
-    }
-  } catch (e) {
-    showLoginScreen();
+function getAdminPwd()  { return localStorage.getItem(ADMIN_PWD_KEY) || ''; }
+function isAdminPwdSet(){ return !!getAdminPwd(); }
+
+/* ── Gate: require admin before running callback ── */
+
+function requireAdmin(callback) {
+  if (adminUnlocked) { callback(); return; }
+  if (!isAdminPwdSet()) {
+    // no password set yet → unlock immediately, guide user to set one
+    adminUnlocked = true;
+    callback();
+    toast('ยังไม่ได้ตั้งรหัสผ่าน Admin — ตั้งได้ที่ ผู้ใช้งาน', '');
+    return;
   }
-
-  // React to auth state changes (login / logout from another tab, token refresh)
-  sbClient.auth.onAuthStateChange(function (event, session) {
-    if (event === 'SIGNED_IN' && session) {
-      currentUser = session.user;
-      onAuthSuccess();
-    } else if (event === 'SIGNED_OUT') {
-      currentUser = null;
-      // clear app state
-      hospitals  = [];
-      allIssues  = [];
-      renderHospList();
-      updateMetrics();
-      showLoginScreen();
-    }
-  });
+  showAdminModal(callback);
 }
 
-function onAuthSuccess() {
-  hideLoginScreen();
-  updateUserInfo();
-  loadHospitalsFromSb();
+/* ── Admin Modal ── */
+
+function showAdminModal(callback) {
+  var modal = document.getElementById('adminModal');
+  var err   = document.getElementById('adminErr');
+  var inp   = document.getElementById('adminPwdInput');
+  err.textContent = '';
+  inp.value = '';
+  modal._cb = callback;
+  modal.style.display = 'flex';
+  setTimeout(function () { inp.focus(); }, 80);
 }
 
-/* ── Login / Logout ── */
-
-async function doLogin() {
-  var email = (document.getElementById('loginEmail').value || '').trim();
-  var pwd   =  document.getElementById('loginPwd').value   || '';
-  var errEl =  document.getElementById('loginErr');
-  var btn   =  document.getElementById('loginBtn');
-
-  errEl.textContent = '';
-  if (!email || !pwd) { errEl.textContent = 'กรุณากรอกอีเมล์และรหัสผ่าน'; return; }
-
-  btn.disabled    = true;
-  btn.textContent = 'กำลังเข้าสู่ระบบ...';
-
-  var result = await sbClient.auth.signInWithPassword({ email: email, password: pwd });
-
-  btn.disabled    = false;
-  btn.textContent = 'เข้าสู่ระบบ';
-
-  if (result.error) {
-    errEl.textContent = 'อีเมล์หรือรหัสผ่านไม่ถูกต้อง';
-    document.getElementById('loginPwd').value = '';
-    document.getElementById('loginPwd').focus();
-  }
-  // success is handled by onAuthStateChange → SIGNED_IN
-}
-
-async function doLogout() {
-  await sbClient.auth.signOut();
-  // SIGNED_OUT event will handle the rest
-}
-
-async function sendPasswordReset() {
-  if (!currentUser) return;
-  var result = await sbClient.auth.resetPasswordForEmail(currentUser.email);
-  if (result.error) {
-    toast('ส่งลิงก์ไม่สำเร็จ: ' + result.error.message, 'error');
+function confirmAdminPwd() {
+  var inp = document.getElementById('adminPwdInput');
+  var err = document.getElementById('adminErr');
+  if (inp.value === getAdminPwd()) {
+    adminUnlocked = true;
+    var cb = document.getElementById('adminModal')._cb;
+    closeAdminModal();
+    if (cb) cb();
   } else {
-    toast('ส่งลิงก์รีเซ็ตรหัสผ่านไปที่ ' + currentUser.email + ' แล้ว', 'success');
+    err.textContent = 'รหัสผ่านไม่ถูกต้อง';
+    inp.value = '';
+    inp.focus();
   }
 }
 
-/* ── UI Helpers ── */
-
-function showLoginScreen() {
-  var sc = document.getElementById('loginScreen');
-  if (sc) sc.style.display = 'flex';
-  // clear password field for security
-  var pwd = document.getElementById('loginPwd');
-  if (pwd) pwd.value = '';
-  setTimeout(function () {
-    var em = document.getElementById('loginEmail');
-    if (em) em.focus();
-  }, 100);
+function closeAdminModal() {
+  document.getElementById('adminModal').style.display = 'none';
+  document.getElementById('adminPwdInput').value = '';
+  document.getElementById('adminErr').textContent = '';
 }
 
-function hideLoginScreen() {
-  var sc = document.getElementById('loginScreen');
-  if (sc) sc.style.display = 'none';
+function adminKeyPress(e) {
+  if (e.key === 'Enter') confirmAdminPwd();
 }
 
-function updateUserInfo() {
-  if (!currentUser) return;
-  var email    = currentUser.email || '';
-  var lastSign = currentUser.last_sign_in_at
-    ? new Date(currentUser.last_sign_in_at).toLocaleString('th-TH', { dateStyle: 'short', timeStyle: 'short' })
-    : '—';
+/* ── Lock Settings ── */
 
-  var letter = email ? email[0].toUpperCase() : 'U';
-
-  var sEl = document.getElementById('sidebarUserEmail');
-  if (sEl) sEl.textContent = email;
-
-  var saEl = document.getElementById('sidebarUserAvatar');
-  if (saEl) saEl.textContent = letter;
-
-  var uaEl = document.getElementById('userViewAvatar');
-  if (uaEl) uaEl.textContent = letter;
-
-  var uEl = document.getElementById('userViewEmail');
-  if (uEl) uEl.textContent = email;
-
-  var lEl = document.getElementById('userViewLastLogin');
-  if (lEl) lEl.textContent = lastSign;
-
-  var idEl = document.getElementById('userViewId');
-  if (idEl) idEl.textContent = currentUser.id ? currentUser.id.slice(0, 8) + '…' : '—';
+function lockAdmin() {
+  adminUnlocked = false;
+  // navigate away from settings if currently on one
+  var activeView = document.querySelector('.view.active');
+  if (activeView && ['view-hospitals','view-user'].indexOf(activeView.id) >= 0) {
+    gotoTabDirect('overview');
+  }
+  toast('ล็อคการตั้งค่าแล้ว', '');
+  updateLockBtn();
 }
 
-/* ── Enter key on password field ── */
-function loginKeyPress(e) {
-  if (e.key === 'Enter') doLogin();
+function updateLockBtn() {
+  var btn = document.getElementById('lockAdminBtn');
+  if (btn) btn.style.display = adminUnlocked ? '' : 'none';
+}
+
+/* ── Set / Change Password ── */
+
+function saveAdminPassword() {
+  var cur     = document.getElementById('curAdminPwd').value;
+  var newPwd  = document.getElementById('newAdminPwd').value.trim();
+  var confirm = document.getElementById('confirmAdminPwd').value.trim();
+
+  if (isAdminPwdSet() && cur !== getAdminPwd()) {
+    toast('รหัสผ่านปัจจุบันไม่ถูกต้อง', 'error');
+    return;
+  }
+  if (!newPwd) { toast('กรุณาใส่รหัสผ่านใหม่', 'error'); return; }
+  if (newPwd !== confirm) { toast('รหัสผ่านใหม่ไม่ตรงกัน', 'error'); return; }
+
+  localStorage.setItem(ADMIN_PWD_KEY, newPwd);
+  document.getElementById('curAdminPwd').value     = '';
+  document.getElementById('newAdminPwd').value     = '';
+  document.getElementById('confirmAdminPwd').value = '';
+  toast('ตั้งรหัสผ่าน Admin สำเร็จ', 'success');
+  renderAdminStatus();
+}
+
+function renderAdminStatus() {
+  var el = document.getElementById('adminPwdStatus');
+  if (!el) return;
+  if (isAdminPwdSet()) {
+    el.innerHTML = '<span style="color:var(--gr)">● ตั้งรหัสผ่านแล้ว</span>';
+  } else {
+    el.innerHTML = '<span style="color:var(--am)">● ยังไม่ได้ตั้งรหัสผ่าน</span>';
+  }
+  var curRow = document.getElementById('curPwdRow');
+  if (curRow) curRow.style.display = isAdminPwdSet() ? '' : 'none';
 }
