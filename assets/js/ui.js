@@ -92,6 +92,35 @@ function checkResp() {
 }
 window.addEventListener('resize', checkResp);
 
+/* ── Font Size ── */
+
+var _FZ_STEPS = [0.85, 0.92, 1, 1.1, 1.2, 1.35];
+var _fzIdx    = 2;
+
+function initFontSize() {
+  var saved = parseInt(localStorage.getItem('bms-fz'));
+  if (!isNaN(saved) && saved >= 0 && saved < _FZ_STEPS.length) _fzIdx = saved;
+  _applyFz();
+}
+
+function adjFontSize(d) {
+  _fzIdx = Math.max(0, Math.min(_FZ_STEPS.length - 1, _fzIdx + d));
+  localStorage.setItem('bms-fz', _fzIdx);
+  _applyFz();
+}
+
+function _applyFz() {
+  var z = _FZ_STEPS[_fzIdx];
+  var content = document.querySelector('.content');
+  if (content) content.style.zoom = z === 1 ? '' : z;
+  var lbl  = document.getElementById('fzLabel');
+  var btnM = document.getElementById('fzBtnM');
+  var btnP = document.getElementById('fzBtnP');
+  if (lbl)  lbl.textContent  = Math.round(z * 100) + '%';
+  if (btnM) btnM.disabled    = (_fzIdx === 0);
+  if (btnP) btnP.disabled    = (_fzIdx === _FZ_STEPS.length - 1);
+}
+
 /* ── Last Updated ── */
 
 function updateLastUpdate() {

@@ -254,6 +254,13 @@ tr:hover td { background: rgba(99,132,180,.04); color: var(--tx); }
 .interval-sel:hover, .interval-sel:focus { border-color: var(--ac); color: var(--tx); }
 .interval-sel option { background: var(--bg3); }
 
+/* ── Font Size Control ── */
+.fz-ctrl { display: flex; align-items: center; justify-content: space-between; padding: 8px 16px; border-top: 1px solid var(--bdr); }
+.fz-label-txt { font-size: 10px; color: var(--tx3); font-family: var(--mono); letter-spacing: .04em; }
+.fz-btns { display: flex; align-items: center; gap: 4px; }
+.fz-btn { font-size: 10px; font-weight: 700; font-family: var(--mono); padding: 4px 8px; min-height: 28px; letter-spacing: -.02em; }
+.fz-val { font-size: 11px; font-family: var(--mono); color: var(--ac); min-width: 36px; text-align: center; }
+
 /* ── Aging Badge ── */
 .aging-badge { font-size: 9px; font-family: var(--mono); border: 1px solid; border-radius: 3px; padding: 1px 5px; white-space: nowrap; }
 
