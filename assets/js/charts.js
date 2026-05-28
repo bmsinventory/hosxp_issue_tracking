@@ -285,19 +285,49 @@ function buildHospPopup(hospName) {
 
 function buildIssueListPopup(issues) {
   if (!issues.length) return '<div class="empty">ไม่มีรายการ</div>';
-  var h = '<div style="font-size:11px;font-family:var(--mono);color:var(--tx3);margin-bottom:10px">' + issues.length + ' รายการ</div>';
-  for (var i = 0; i < Math.min(issues.length, 50); i++) {
-    var x  = issues[i];
-    var pc = pillClass(x.status);
-    h += '<div style="padding:8px 0;border-bottom:1px solid var(--bdr);display:flex;align-items:flex-start;gap:8px">';
-    h += '<span class="pill ' + pc + '" style="font-size:9px;flex-shrink:0">' + x.status + '</span>';
-    h += '<div style="flex:1;min-width:0">';
-    h += '<div style="font-size:12px;color:var(--tx);font-weight:500;white-space:normal">' + escHtml(x.topic || '—') + '</div>';
-    if (x.hospital || x.product) h += '<div style="font-size:10px;font-family:var(--mono);color:var(--tx3);margin-top:2px">' + (x.hospital ? escHtml(x.hospital) + ' · ' : '') + escHtml(x.product || '') + '</div>';
-    if (x.dept) h += '<div style="font-size:10px;font-family:var(--mono);color:var(--tx3)">' + escHtml(x.dept) + '</div>';
-    h += '</div></div>';
+
+  // group by product
+  var groups = {}, order = [];
+  for (var i = 0; i < issues.length; i++) {
+    var p = issues[i].product || 'ไม่ระบุ Product';
+    if (!groups[p]) { groups[p] = []; order.push(p); }
+    groups[p].push(issues[i]);
   }
-  if (issues.length > 50) h += '<div style="font-size:11px;font-family:var(--mono);color:var(--tx3);margin-top:8px">...และอีก ' + (issues.length - 50) + ' รายการ</div>';
+
+  var singleProd = order.length === 1;
+  var h = '<div style="font-size:11px;font-family:var(--mono);color:var(--tx3);margin-bottom:14px">'
+    + issues.length + ' รายการ' + (singleProd ? '' : ' · ' + order.length + ' Product') + '</div>';
+
+  for (var gi = 0; gi < order.length; gi++) {
+    var prod = order[gi];
+    var list = groups[prod];
+    var pCol = PROD_COLORS[prod] || '#8899bb';
+
+    if (!singleProd) {
+      h += '<div style="display:flex;align-items:center;gap:8px;margin:' + (gi > 0 ? '20px' : '0') + ' 0 10px">';
+      h += '<span style="width:8px;height:8px;border-radius:50%;background:' + pCol + ';flex-shrink:0"></span>';
+      h += '<span style="font-size:11px;font-weight:700;font-family:var(--mono);color:' + pCol + '">' + escHtml(prod) + '</span>';
+      h += '<span style="font-size:10px;font-family:var(--mono);color:var(--tx3)">(' + list.length + ' รายการ)</span>';
+      h += '<div style="flex:1;height:1px;background:var(--bdr)"></div></div>';
+    }
+
+    var shown = Math.min(list.length, 100);
+    for (var i = 0; i < shown; i++) {
+      var x  = list[i];
+      var pc = pillClass(x.status);
+      h += '<div style="padding:7px 0 7px ' + (singleProd ? '0' : '16px') + ';border-bottom:1px solid var(--bdr);display:flex;align-items:flex-start;gap:8px">';
+      h += '<span class="pill ' + pc + '" style="font-size:9px;flex-shrink:0">' + x.status + '</span>';
+      h += '<div style="flex:1;min-width:0">';
+      h += '<div style="font-size:13px;color:var(--tx);font-weight:500;white-space:normal">' + escHtml(x.topic || '—') + '</div>';
+      var meta = [];
+      if (x.hospital) meta.push(escHtml(x.hospital));
+      if (singleProd && x.product) meta.push(escHtml(x.product));
+      if (x.dept)     meta.push(escHtml(x.dept));
+      if (meta.length) h += '<div style="font-size:10px;font-family:var(--mono);color:var(--tx3);margin-top:3px">' + meta.join(' · ') + '</div>';
+      h += '</div></div>';
+    }
+    if (list.length > 100) h += '<div style="font-size:11px;font-family:var(--mono);color:var(--tx3);margin-top:6px;padding-left:' + (singleProd ? '0' : '16px') + '">...และอีก ' + (list.length - 100) + ' รายการ</div>';
+  }
   return h;
 }
 
