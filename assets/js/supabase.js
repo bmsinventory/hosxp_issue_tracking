@@ -23,38 +23,68 @@ function initSb() {
   });
 }
 
-/* ── Visit Counter ── */
+/* ── Visit Counter (IP-based deduplication) ── */
+
+/* djb2 hash — ไม่เก็บ IP ดิบ เพื่อความเป็นส่วนตัว */
+function _hashIp(ip) {
+  var s = 'bms2568:' + ip, h = 5381;
+  for (var i = 0; i < s.length; i++) h = (((h << 5) + h) ^ s.charCodeAt(i)) >>> 0;
+  return h.toString(16);
+}
+
+async function _getIp() {
+  try {
+    var res = await Promise.race([
+      fetch('https://api.ipify.org?format=json'),
+      new Promise(function (_, rej) { setTimeout(function () { rej(new Error('timeout')); }, 4000); })
+    ]);
+    var d = await res.json();
+    return d.ip || null;
+  } catch (e) { return null; }
+}
 
 async function trackVisit() {
   if (!sbClient) return;
   try {
-    var today   = new Date().toISOString().slice(0, 10);
-    var newVisit = (localStorage.getItem('bms-last-track') !== today);
+    var today  = new Date().toISOString().slice(0, 10);
+    var ip     = await _getIp();
+    var ipHash = ip ? _hashIp(ip) : _hashIp('fallback:' + (localStorage.getItem('bms-uid') || _mkUid()));
 
     var res = await sbClient
       .from('app_config')
       .select('key, value')
-      .in('key', ['visit_count', 'visit_today', 'visit_date']);
+      .in('key', ['visit_count', 'visit_today', 'visit_ips_date', 'visit_ips_today']);
 
     var map = {};
     if (res.data) res.data.forEach(function (r) { map[r.key] = r.value; });
 
-    var total      = parseInt(map['visit_count'] || '0') + 1;
-    var prevDate   = map['visit_date'] || '';
-    var todayCnt   = (prevDate === today ? parseInt(map['visit_today'] || '0') : 0);
-    if (newVisit) {
-      todayCnt++;
-      localStorage.setItem('bms-last-track', today);
+    var total    = parseInt(map['visit_count'] || '0') + 1;
+    var ipsDate  = map['visit_ips_date'] || '';
+    var ipsList  = [];
+    if (ipsDate === today) {
+      try { ipsList = JSON.parse(map['visit_ips_today'] || '[]'); } catch (e) {}
     }
+    var prevTodayCnt = (ipsDate === today ? parseInt(map['visit_today'] || '0') : 0);
+    var isNewIp      = ipsList.indexOf(ipHash) < 0;
+    var todayCnt     = isNewIp ? prevTodayCnt + 1 : prevTodayCnt;
+    if (isNewIp) ipsList.push(ipHash);
 
+    var now = new Date().toISOString();
     await sbClient.from('app_config').upsert([
-      { key: 'visit_count', value: String(total),    updated_at: new Date().toISOString() },
-      { key: 'visit_today', value: String(todayCnt), updated_at: new Date().toISOString() },
-      { key: 'visit_date',  value: today,            updated_at: new Date().toISOString() }
+      { key: 'visit_count',     value: String(total),             updated_at: now },
+      { key: 'visit_today',     value: String(todayCnt),          updated_at: now },
+      { key: 'visit_ips_date',  value: today,                     updated_at: now },
+      { key: 'visit_ips_today', value: JSON.stringify(ipsList),   updated_at: now }
     ], { onConflict: 'key' });
 
     _renderVisitStats(total, todayCnt, today);
   } catch (e) {}
+}
+
+function _mkUid() {
+  var u = Math.random().toString(36).slice(2) + Date.now().toString(36);
+  localStorage.setItem('bms-uid', u);
+  return u;
 }
 
 function _renderVisitStats(total, todayCnt, date) {
