@@ -17,28 +17,38 @@ function fetchAll(isAuto) {
       queue.push({ h: hospitals[i], sh: hospitals[i].sheets[j] });
     }
   }
-  var idx = 0;
 
-  function next() {
-    if (idx >= queue.length) {
-      allIssues = [];
-      for (var i = 0; i < hospitals.length; i++) {
-        for (var j = 0; j < hospitals[i].sheets.length; j++) {
-          allIssues = allIssues.concat(hospitals[i].sheets[j].issues);
-        }
-      }
-      setBtnState(btn, 'ดึงข้อมูล', false);
-      if (icon) icon.style.animation = '';
-      postLoad();
-      saveState();
-      if (isAuto) toast('อัปเดตอัตโนมัติ ' + new Date().toLocaleTimeString('th-TH', { hour: '2-digit', minute: '2-digit' }), '');
-      if (_arMinutes > 0) startAutoCountdown();
-      return;
-    }
-    var q = queue[idx++];
-    fetchSheet(q.h, q.sh, function () { renderHospList(); next(); });
+  if (!queue.length) {
+    setBtnState(btn, 'ดึงข้อมูล', false);
+    if (icon) icon.style.animation = '';
+    if (_arMinutes > 0) startAutoCountdown();
+    return;
   }
-  next();
+
+  var done = 0, total = queue.length;
+
+  function onSheetDone() {
+    done++;
+    setBtnState(btn, 'กำลังดึง... ' + done + '/' + total, true);
+    renderHospList();
+    if (done < total) return;
+    allIssues = [];
+    for (var i = 0; i < hospitals.length; i++) {
+      for (var j = 0; j < hospitals[i].sheets.length; j++) {
+        allIssues = allIssues.concat(hospitals[i].sheets[j].issues);
+      }
+    }
+    setBtnState(btn, 'ดึงข้อมูล', false);
+    if (icon) icon.style.animation = '';
+    postLoad();
+    saveState();
+    if (isAuto) toast('อัปเดตอัตโนมัติ ' + new Date().toLocaleTimeString('th-TH', { hour: '2-digit', minute: '2-digit' }), '');
+    if (_arMinutes > 0) startAutoCountdown();
+  }
+
+  for (var i = 0; i < queue.length; i++) {
+    fetchSheet(queue[i].h, queue[i].sh, onSheetDone);
+  }
 }
 
 function postLoad() {
