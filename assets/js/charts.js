@@ -283,51 +283,111 @@ function buildHospPopup(hospName) {
   return buildIssueListPopup(issues);
 }
 
+/* ── Popup Pagination State ── */
+var _popupAllIssues = [];
+var POPUP_PAGE_SIZE = 50;
+
 function buildIssueListPopup(issues) {
+  _popupAllIssues = issues;
+  return renderPopupPage(1);
+}
+
+function popupGotoPage(page) {
+  var el = document.getElementById('cpBody');
+  if (el) { el.innerHTML = renderPopupPage(page); el.scrollTop = 0; }
+}
+
+function buildPageBar(page, total) {
+  var h = '<div style="display:flex;align-items:center;gap:5px;flex-wrap:wrap">';
+  h += '<button class="btn btn-sm" onclick="popupGotoPage(' + (page - 1) + ')"' + (page <= 1 ? ' disabled' : '') + '>&#8249;</button>';
+  var pages = [];
+  if (total <= 7) {
+    for (var i = 1; i <= total; i++) pages.push(i);
+  } else {
+    pages.push(1);
+    if (page > 3) pages.push('…');
+    for (var i = Math.max(2, page - 1); i <= Math.min(total - 1, page + 1); i++) pages.push(i);
+    if (page < total - 2) pages.push('…');
+    pages.push(total);
+  }
+  for (var pi = 0; pi < pages.length; pi++) {
+    if (pages[pi] === '…') {
+      h += '<span style="font-size:12px;font-family:var(--mono);color:var(--tx3);padding:0 2px">…</span>';
+    } else {
+      var pg = pages[pi];
+      h += '<button class="btn btn-sm' + (pg === page ? ' btn-primary' : '') + '" onclick="popupGotoPage(' + pg + ')"' + (pg === page ? ' disabled' : '') + '>' + pg + '</button>';
+    }
+  }
+  h += '<button class="btn btn-sm" onclick="popupGotoPage(' + (page + 1) + ')"' + (page >= total ? ' disabled' : '') + '>&#8250;</button>';
+  h += '</div>';
+  return h;
+}
+
+function renderPopupPage(page) {
+  var issues = _popupAllIssues;
   if (!issues.length) return '<div class="empty">ไม่มีรายการ</div>';
 
-  // group by product
+  var totalPages = Math.ceil(issues.length / POPUP_PAGE_SIZE);
+  var start      = (page - 1) * POPUP_PAGE_SIZE;
+  var end        = Math.min(start + POPUP_PAGE_SIZE, issues.length);
+  var slice      = issues.slice(start, end);
+
+  // group current page by product
   var groups = {}, order = [];
-  for (var i = 0; i < issues.length; i++) {
-    var p = issues[i].product || 'ไม่ระบุ Product';
+  for (var i = 0; i < slice.length; i++) {
+    var p = slice[i].product || 'ไม่ระบุ Product';
     if (!groups[p]) { groups[p] = []; order.push(p); }
-    groups[p].push(issues[i]);
+    groups[p].push({ iss: slice[i], seq: start + i + 1 });
   }
-
   var singleProd = order.length === 1;
-  var h = '<div style="font-size:11px;font-family:var(--mono);color:var(--tx3);margin-bottom:14px">'
-    + issues.length + ' รายการ' + (singleProd ? '' : ' · ' + order.length + ' Product') + '</div>';
 
+  var h = '';
+
+  // ─ Top bar ─
+  h += '<div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px;margin-bottom:14px">';
+  h += '<span style="font-size:11px;font-family:var(--mono);color:var(--tx3)">'
+    + issues.length + ' รายการ · #' + (start + 1) + '–#' + end
+    + (totalPages > 1 ? ' · หน้า ' + page + '/' + totalPages : '') + '</span>';
+  if (totalPages > 1) h += buildPageBar(page, totalPages);
+  h += '</div>';
+
+  // ─ Items grouped by product ─
   for (var gi = 0; gi < order.length; gi++) {
     var prod = order[gi];
     var list = groups[prod];
     var pCol = PROD_COLORS[prod] || '#8899bb';
 
     if (!singleProd) {
-      h += '<div style="display:flex;align-items:center;gap:8px;margin:' + (gi > 0 ? '20px' : '0') + ' 0 10px">';
+      h += '<div style="display:flex;align-items:center;gap:8px;margin:' + (gi > 0 ? '18px' : '0') + ' 0 8px">';
       h += '<span style="width:8px;height:8px;border-radius:50%;background:' + pCol + ';flex-shrink:0"></span>';
       h += '<span style="font-size:11px;font-weight:700;font-family:var(--mono);color:' + pCol + '">' + escHtml(prod) + '</span>';
-      h += '<span style="font-size:10px;font-family:var(--mono);color:var(--tx3)">(' + list.length + ' รายการ)</span>';
+      h += '<span style="font-size:10px;font-family:var(--mono);color:var(--tx3)">(' + list.length + ')</span>';
       h += '<div style="flex:1;height:1px;background:var(--bdr)"></div></div>';
     }
 
-    var shown = Math.min(list.length, 100);
-    for (var i = 0; i < shown; i++) {
-      var x  = list[i];
-      var pc = pillClass(x.status);
-      h += '<div style="padding:7px 0 7px ' + (singleProd ? '0' : '16px') + ';border-bottom:1px solid var(--bdr);display:flex;align-items:flex-start;gap:8px">';
+    for (var i = 0; i < list.length; i++) {
+      var x = list[i].iss, sq = list[i].seq, pc = pillClass(x.status);
+      h += '<div style="padding:7px 0 7px ' + (singleProd ? '0' : '14px') + ';border-bottom:1px solid var(--bdr);display:flex;align-items:flex-start;gap:8px">';
+      h += '<span style="font-size:10px;font-family:var(--mono);color:var(--tx3);min-width:28px;flex-shrink:0;padding-top:3px;text-align:right">' + sq + '.</span>';
       h += '<span class="pill ' + pc + '" style="font-size:9px;flex-shrink:0">' + x.status + '</span>';
       h += '<div style="flex:1;min-width:0">';
       h += '<div style="font-size:13px;color:var(--tx);font-weight:500;white-space:normal">' + escHtml(x.topic || '—') + '</div>';
       var meta = [];
-      if (x.hospital) meta.push(escHtml(x.hospital));
+      if (x.hospital)              meta.push(escHtml(x.hospital));
       if (singleProd && x.product) meta.push(escHtml(x.product));
-      if (x.dept)     meta.push(escHtml(x.dept));
+      if (x.dept)                  meta.push(escHtml(x.dept));
       if (meta.length) h += '<div style="font-size:10px;font-family:var(--mono);color:var(--tx3);margin-top:3px">' + meta.join(' · ') + '</div>';
       h += '</div></div>';
     }
-    if (list.length > 100) h += '<div style="font-size:11px;font-family:var(--mono);color:var(--tx3);margin-top:6px;padding-left:' + (singleProd ? '0' : '16px') + '">...และอีก ' + (list.length - 100) + ' รายการ</div>';
   }
+
+  // ─ Bottom pagination ─
+  if (totalPages > 1) {
+    h += '<div style="display:flex;justify-content:center;margin-top:16px;padding-top:14px;border-top:1px solid var(--bdr)">';
+    h += buildPageBar(page, totalPages);
+    h += '</div>';
+  }
+
   return h;
 }
 
