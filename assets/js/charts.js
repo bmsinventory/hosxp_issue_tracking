@@ -341,14 +341,22 @@ function renderPopupPage(page) {
   }
   typeOrder.sort(function (a, b) { return typeTotals[b] - typeTotals[a]; });
 
-  // ─ Group current page: Product → Type ─
-  var groups = {}, prodOrder = [];
+  // ─ Count type occurrences before this page (for continuous per-type numbering) ─
+  var typePreCount = {};
+  for (var i = 0; i < start; i++) {
+    var t = issues[i].type || 'ไม่ระบุกลุ่ม';
+    typePreCount[t] = (typePreCount[t] || 0) + 1;
+  }
+
+  // ─ Group current page: Product → Type, seq resets per type ─
+  var groups = {}, prodOrder = [], typeLocalCount = {};
   for (var i = 0; i < slice.length; i++) {
     var p = slice[i].product || 'ไม่ระบุ Product';
     var t = slice[i].type    || 'ไม่ระบุกลุ่ม';
     if (!groups[p]) { groups[p] = { types: {}, typeOrder: [] }; prodOrder.push(p); }
     if (!groups[p].types[t]) { groups[p].types[t] = []; groups[p].typeOrder.push(t); }
-    groups[p].types[t].push({ iss: slice[i], seq: start + i + 1 });
+    typeLocalCount[t] = (typeLocalCount[t] || 0) + 1;
+    groups[p].types[t].push({ iss: slice[i], seq: (typePreCount[t] || 0) + typeLocalCount[t] });
   }
   var singleProd = prodOrder.length === 1;
 
