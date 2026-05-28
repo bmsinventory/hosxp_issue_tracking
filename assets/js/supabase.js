@@ -17,6 +17,7 @@ function initSb() {
   }
   setSbStatus(true);
   loadHospitalsFromSb();
+  loadAdminPwdFromSb();
 }
 
 function setSbStatus(ok) {

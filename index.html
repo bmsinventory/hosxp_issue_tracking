@@ -325,7 +325,8 @@
         </div>
         <details style="margin-bottom:14px">
           <summary style="cursor:pointer;font-size:11px;color:var(--ac);font-family:var(--mono);outline:none;user-select:none;list-style:none">▶ SQL สำหรับสร้าง Table ใน Supabase</summary>
-          <pre style="margin-top:10px;background:var(--bg);border:1px solid var(--bdr);padding:12px 16px;border-radius:var(--r2);font-size:11px;color:var(--tl);overflow-x:auto;line-height:1.9;white-space:pre">create table public.hospital_sheets (
+          <pre style="margin-top:10px;background:var(--bg);border:1px solid var(--bdr);padding:12px 16px;border-radius:var(--r2);font-size:11px;color:var(--tl);overflow-x:auto;line-height:1.9;white-space:pre">-- Table 1: Hospital Sheets
+create table public.hospital_sheets (
   id            bigint generated always as identity primary key,
   hospital_name text   not null,
   product       text   not null,
@@ -334,10 +335,18 @@
   created_at    timestamptz default now(),
   unique(hospital_name, product)
 );
-
 alter table public.hospital_sheets enable row level security;
-
 create policy "Allow all" on public.hospital_sheets
+  for all using (true) with check (true);
+
+-- Table 2: App Config (เก็บ Admin password และ config อื่นๆ)
+create table public.app_config (
+  key        text primary key,
+  value      text default '',
+  updated_at timestamptz default now()
+);
+alter table public.app_config enable row level security;
+create policy "Allow all" on public.app_config
   for all using (true) with check (true);</pre>
         </details>
         <div style="display:grid;grid-template-columns:1fr 1fr auto auto;gap:10px;align-items:flex-end">

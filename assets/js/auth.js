@@ -1,19 +1,49 @@
-/* ── Admin Password — protects Settings tabs only ── */
+/* ── Admin Password — stored in Supabase app_config table ── */
 
-var adminUnlocked = false;
-var ADMIN_PWD_KEY = 'bms-admin-pwd';
+var adminUnlocked  = false;
+var cachedAdminPwd = null; // null = not loaded yet, '' = no password set
+
+var ADMIN_CFG_KEY  = 'admin_password';
+var ADMIN_PWD_KEY  = 'bms-admin-pwd'; // legacy localStorage fallback
+
+/* ── Load from Supabase ── */
+
+async function loadAdminPwdFromSb() {
+  if (!sbClient) return;
+  var res = await sbClient
+    .from('app_config')
+    .select('value')
+    .eq('key', ADMIN_CFG_KEY)
+    .maybeSingle();
+  if (res.error) {
+    // table may not exist yet — fall back to localStorage
+    cachedAdminPwd = localStorage.getItem(ADMIN_PWD_KEY) || '';
+  } else {
+    cachedAdminPwd = (res.data && res.data.value) ? res.data.value : '';
+    // migrate from localStorage if Supabase has nothing yet
+    if (!cachedAdminPwd) {
+      var local = localStorage.getItem(ADMIN_PWD_KEY);
+      if (local) cachedAdminPwd = local;
+    }
+  }
+  renderAdminStatus();
+}
 
 /* ── Helpers ── */
 
-function getAdminPwd()  { return localStorage.getItem(ADMIN_PWD_KEY) || ''; }
-function isAdminPwdSet(){ return !!getAdminPwd(); }
+function getAdminPwd()   { return cachedAdminPwd !== null ? cachedAdminPwd : ''; }
+function isAdminPwdSet() { return !!getAdminPwd(); }
 
 /* ── Gate: require admin before running callback ── */
 
 function requireAdmin(callback) {
   if (adminUnlocked) { callback(); return; }
+
+  if (cachedAdminPwd === null) {
+    toast('กำลังโหลดข้อมูล Admin...', '');
+    return;
+  }
   if (!isAdminPwdSet()) {
-    // no password set yet → unlock immediately, guide user to set one
     adminUnlocked = true;
     callback();
     toast('ยังไม่ได้ตั้งรหัสผ่าน Admin — ตั้งได้ที่ ผู้ใช้งาน', '');
@@ -29,8 +59,8 @@ function showAdminModal(callback) {
   var err   = document.getElementById('adminErr');
   var inp   = document.getElementById('adminPwdInput');
   err.textContent = '';
-  inp.value = '';
-  modal._cb = callback;
+  inp.value       = '';
+  modal._cb       = callback;
   modal.style.display = 'flex';
   setTimeout(function () { inp.focus(); }, 80);
 }
@@ -52,8 +82,8 @@ function confirmAdminPwd() {
 
 function closeAdminModal() {
   document.getElementById('adminModal').style.display = 'none';
-  document.getElementById('adminPwdInput').value = '';
-  document.getElementById('adminErr').textContent = '';
+  document.getElementById('adminPwdInput').value      = '';
+  document.getElementById('adminErr').textContent     = '';
 }
 
 function adminKeyPress(e) {
@@ -64,9 +94,8 @@ function adminKeyPress(e) {
 
 function lockAdmin() {
   adminUnlocked = false;
-  // navigate away from settings if currently on one
   var activeView = document.querySelector('.view.active');
-  if (activeView && ['view-hospitals','view-user'].indexOf(activeView.id) >= 0) {
+  if (activeView && ['view-hospitals', 'view-user'].indexOf(activeView.id) >= 0) {
     gotoTabDirect('overview');
   }
   toast('ล็อคการตั้งค่าแล้ว', '');
@@ -78,33 +107,55 @@ function updateLockBtn() {
   if (btn) btn.style.display = adminUnlocked ? '' : 'none';
 }
 
-/* ── Set / Change Password ── */
+/* ── Save Admin Password to Supabase ── */
 
-function saveAdminPassword() {
-  var cur     = document.getElementById('curAdminPwd').value;
-  var newPwd  = document.getElementById('newAdminPwd').value.trim();
-  var confirm = document.getElementById('confirmAdminPwd').value.trim();
+async function saveAdminPassword() {
+  var curEl     = document.getElementById('curAdminPwd');
+  var newPwdEl  = document.getElementById('newAdminPwd');
+  var confEl    = document.getElementById('confirmAdminPwd');
+  var cur       = curEl.value;
+  var newPwd    = newPwdEl.value.trim();
+  var confirm   = confEl.value.trim();
 
   if (isAdminPwdSet() && cur !== getAdminPwd()) {
     toast('รหัสผ่านปัจจุบันไม่ถูกต้อง', 'error');
     return;
   }
-  if (!newPwd) { toast('กรุณาใส่รหัสผ่านใหม่', 'error'); return; }
-  if (newPwd !== confirm) { toast('รหัสผ่านใหม่ไม่ตรงกัน', 'error'); return; }
+  if (!newPwd)           { toast('กรุณาใส่รหัสผ่านใหม่', 'error'); return; }
+  if (newPwd !== confirm) { toast('รหัสผ่านใหม่ไม่ตรงกัน',  'error'); return; }
+  if (!sbClient)          { toast('กรุณาเชื่อมต่อ Supabase ก่อน', 'error'); return; }
 
-  localStorage.setItem(ADMIN_PWD_KEY, newPwd);
-  document.getElementById('curAdminPwd').value     = '';
-  document.getElementById('newAdminPwd').value     = '';
-  document.getElementById('confirmAdminPwd').value = '';
-  toast('ตั้งรหัสผ่าน Admin สำเร็จ', 'success');
+  var res = await sbClient
+    .from('app_config')
+    .upsert(
+      { key: ADMIN_CFG_KEY, value: newPwd, updated_at: new Date().toISOString() },
+      { onConflict: 'key' }
+    );
+
+  if (res.error) {
+    toast('บันทึกไม่สำเร็จ: ' + res.error.message, 'error');
+    return;
+  }
+
+  cachedAdminPwd = newPwd;
+  localStorage.removeItem(ADMIN_PWD_KEY); // clean up old localStorage entry
+
+  curEl.value  = '';
+  newPwdEl.value = '';
+  confEl.value   = '';
+  toast('บันทึกรหัสผ่าน Admin ลง Supabase แล้ว', 'success');
   renderAdminStatus();
 }
+
+/* ── Render status in User view ── */
 
 function renderAdminStatus() {
   var el = document.getElementById('adminPwdStatus');
   if (!el) return;
-  if (isAdminPwdSet()) {
-    el.innerHTML = '<span style="color:var(--gr)">● ตั้งรหัสผ่านแล้ว</span>';
+  if (cachedAdminPwd === null) {
+    el.innerHTML = '<span style="color:var(--tx3)">● กำลังโหลด...</span>';
+  } else if (isAdminPwdSet()) {
+    el.innerHTML = '<span style="color:var(--gr)">● ตั้งรหัสผ่านแล้ว (Supabase)</span>';
   } else {
     el.innerHTML = '<span style="color:var(--am)">● ยังไม่ได้ตั้งรหัสผ่าน</span>';
   }
