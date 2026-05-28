@@ -198,7 +198,7 @@ tr:hover td { background: rgba(99,132,180,.04); color: var(--tx); }
 .ic-hosp { font-size: 11px; color: var(--ac); font-weight: 500; white-space: nowrap; }
 .ic-body { display: grid; grid-template-columns: 80px 1fr; gap: 1px 10px; margin-bottom: 10px; align-items: baseline; }
 .ic-bl { font-size: 10px; font-family: var(--mono); color: var(--tx3); text-transform: uppercase; letter-spacing: .04em; padding-top: 3px; white-space: nowrap; }
-.ic-bv { font-size: 14px; font-weight: 500; color: var(--tx); line-height: 1.5; padding: 2px 0; }
+.ic-bv { font-size: 14px; font-weight: 400; color: var(--tx); line-height: 1.5; padding: 2px 0; }
 .ic-bv.ic-fix { font-size: 13px; font-weight: 400; color: var(--tl); }
 .ic-divider { grid-column: 1/-1; height: 1px; background: var(--bdr); margin: 4px 0; }
 .ic-meta { display: flex; flex-wrap: wrap; gap: 4px 0; border-top: 1px solid var(--bdr); padding-top: 9px; }
