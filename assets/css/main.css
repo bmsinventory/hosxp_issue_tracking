@@ -86,7 +86,16 @@ select option { background: var(--bg3); }
 
 /* ── Cards ── */
 .card { background: var(--bg2); border: 1px solid var(--bdr); border-radius: var(--r); padding: 18px 20px; }
-.card-title { font-size: 11px; color: var(--tx3); font-family: var(--mono); letter-spacing: .06em; text-transform: uppercase; margin-bottom: 14px; }
+.card-title { font-size: 11px; color: var(--tx3); font-family: var(--mono); letter-spacing: .06em; text-transform: uppercase; margin-bottom: 14px; display: flex; align-items: center; gap: 7px; }
+.card-title svg { flex-shrink: 0; opacity: .75; }
+
+/* ── Settings Tabs ── */
+.stab-bar { display: flex; gap: 4px; padding: 4px; background: var(--bg3); border: 1px solid var(--bdr); border-radius: var(--r); margin-bottom: 20px; flex-wrap: wrap; }
+.stab-btn { flex: 1; display: inline-flex; align-items: center; justify-content: center; gap: 7px; padding: 9px 14px; border-radius: var(--r2); font-family: var(--sans); font-size: 13px; font-weight: 500; cursor: pointer; border: none; background: none; color: var(--tx2); transition: all .15s; white-space: nowrap; min-height: 38px; touch-action: manipulation; }
+.stab-btn:hover { background: var(--bg4); color: var(--tx); }
+.stab-btn.active { background: var(--bg2); color: var(--ac); box-shadow: 0 1px 6px rgba(0,0,0,.18); }
+.stab-btn svg { width: 15px; height: 15px; flex-shrink: 0; }
+.stab-pane { display: block; }
 
 /* ── Metrics ── */
 .metrics-grid { display: grid; grid-template-columns: repeat(5,1fr); gap: 12px; margin-bottom: 20px; }

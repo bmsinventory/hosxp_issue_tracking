@@ -18,7 +18,7 @@ function setBtnState(btn, text, disabled) {
 /* ── Navigation ── */
 
 // Tabs that require admin password
-var ADMIN_TABS = ['hospitals', 'user'];
+var ADMIN_TABS = ['settings'];
 
 function gotoTab(id, btn) {
   if (ADMIN_TABS.indexOf(id) >= 0) {
@@ -36,7 +36,16 @@ function gotoTabDirect(id, btn) {
   if (btn) btn.classList.add('active');
   document.getElementById('topbarTitle').textContent = TAB_TITLES[id] || id;
   if (window.innerWidth < 900) closeSidebar();
-  if (id === 'user') renderAdminStatus();
+  if (id === 'settings') { switchStab('hospitals'); renderAdminStatus(); renderHospList(); }
+}
+
+function switchStab(name) {
+  document.querySelectorAll('.stab-pane').forEach(function (el) { el.style.display = 'none'; });
+  document.querySelectorAll('.stab-btn').forEach(function (el) { el.classList.remove('active'); });
+  var pane = document.getElementById('stpane-' + name);
+  var btn  = document.getElementById('stbtn-' + name);
+  if (pane) pane.style.display = '';
+  if (btn)  btn.classList.add('active');
 }
 
 function closeSidebar() {

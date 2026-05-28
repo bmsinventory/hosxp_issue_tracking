@@ -19,12 +19,11 @@ var PROD_COLORS = {
 };
 
 var TAB_TITLES = {
-  timeline:  'Timeline รายสัปดาห์',
-  overview:  'ภาพรวมจังหวัด',
-  byhosp:    'รายโรงพยาบาล',
-  all:       'ปัญหาทั้งหมด',
-  hospitals: 'จัดการโรงพยาบาล',
-  user:      'ผู้ใช้งาน'
+  timeline: 'Timeline รายสัปดาห์',
+  overview: 'ภาพรวมจังหวัด',
+  byhosp:   'รายโรงพยาบาล',
+  all:      'ปัญหาทั้งหมด',
+  settings: 'ตั้งค่าระบบ'
 };
 
 var MAP_FIELDS = [

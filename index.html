@@ -86,17 +86,9 @@
     </button>
 
     <div class="nav-sec">ตั้งค่า</div>
-    <button class="nav-item" onclick="gotoTab('hospitals',this)">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg>
-      จัดการโรงพยาบาล
-    </button>
-    <button class="nav-item" onclick="openMap()">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 013 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>
-      Column Mapping
-    </button>
-    <button class="nav-item" onclick="gotoTab('user',this)">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/></svg>
-      ผู้ใช้งาน
+    <button class="nav-item" onclick="gotoTab('settings',this)">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 010 2.83 2 2 0 01-2.83 0l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-4 0v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83-2.83l.06-.06A1.65 1.65 0 004.68 15a1.65 1.65 0 00-1.51-1H3a2 2 0 010-4h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 012.83-2.83l.06.06A1.65 1.65 0 009 4.68a1.65 1.65 0 001-1.51V3a2 2 0 014 0v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 2.83l-.06.06A1.65 1.65 0 0019.4 9a1.65 1.65 0 001.51 1H21a2 2 0 010 4h-.09a1.65 1.65 0 00-1.51 1z"/></svg>
+      ตั้งค่าระบบ
     </button>
   </nav>
 
@@ -166,27 +158,27 @@
     <!-- ── Metric Cards ── -->
     <div class="metrics-grid">
       <div class="metric-card mc-total animate-in n1">
-        <div class="metric-label">ปัญหาทั้งหมด</div>
+        <div class="metric-label"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="12" height="12" style="opacity:.6"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/></svg>ปัญหาทั้งหมด</div>
         <div class="metric-value"    id="mTotal">—</div>
         <div class="metric-sub"      id="mSub">จาก — โรงพยาบาล</div>
       </div>
       <div class="metric-card mc-open animate-in n2">
-        <div class="metric-label">รอดำเนินการ</div>
+        <div class="metric-label"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="12" height="12" style="opacity:.6"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>รอดำเนินการ</div>
         <div class="metric-value mv-red"   id="mOpen">—</div>
         <div class="metric-sub">ต้องดำเนินการด่วน</div>
       </div>
       <div class="metric-card mc-prog animate-in n3">
-        <div class="metric-label">กำลังแก้ไข</div>
+        <div class="metric-label"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="12" height="12" style="opacity:.6"><path d="M14.7 6.3a1 1 0 000 1.4l1.6 1.6a1 1 0 001.4 0l3.77-3.77a6 6 0 01-7.94 7.94l-6.91 6.91a2.12 2.12 0 01-3-3l6.91-6.91a6 6 0 017.94-7.94l-3.76 3.76z"/></svg>กำลังแก้ไข</div>
         <div class="metric-value mv-amber" id="mProg">—</div>
         <div class="metric-sub">อยู่ระหว่างดำเนินการ</div>
       </div>
       <div class="metric-card mc-done animate-in n4">
-        <div class="metric-label">เสร็จแล้ว</div>
+        <div class="metric-label"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="12" height="12" style="opacity:.6"><path d="M22 11.08V12a10 10 0 11-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>เสร็จแล้ว</div>
         <div class="metric-value mv-green" id="mDone">—</div>
         <div class="metric-sub">แก้ไขสำเร็จ</div>
       </div>
       <div class="metric-card mc-rate animate-in n5">
-        <div class="metric-label">อัตราแก้ไข</div>
+        <div class="metric-label"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="12" height="12" style="opacity:.6"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/><polyline points="17 6 23 6 23 12"/></svg>อัตราแก้ไข</div>
         <div class="metric-value mv-teal"  id="mRate">—</div>
         <div class="metric-sub">
           <div class="prog-bar"><div class="prog-fill" id="mBar" style="width:0%"></div></div>
@@ -211,13 +203,13 @@
         </div>
       </div>
       <div class="card" style="margin-bottom:16px">
-        <div class="card-title" id="tlChartTitle">แนวโน้มปัญหา — ย้อนหลัง 12 สัปดาห์</div>
+        <div class="card-title" id="tlChartTitle"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14" height="14"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>แนวโน้มปัญหา — ย้อนหลัง 12 สัปดาห์</div>
         <div class="chart-wrap" style="height:260px">
           <canvas id="cTimeline" role="img" aria-label="กราฟ timeline">กำลังโหลด...</canvas>
         </div>
       </div>
       <div class="card" style="margin-bottom:16px">
-        <div class="card-title">สรุปรายช่วงเวลา</div>
+        <div class="card-title"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14" height="14"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>สรุปรายช่วงเวลา</div>
         <div id="weekBars">
           <div class="empty">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
@@ -240,22 +232,22 @@
       </div>
       <div class="chart-grid" style="margin-bottom:16px">
         <div class="card">
-          <div class="card-title">สถานะต่อ Product</div>
+          <div class="card-title"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14" height="14"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>สถานะต่อ Product</div>
           <div class="chart-wrap" style="height:240px"><canvas id="cProdStatus"></canvas></div>
         </div>
         <div class="card">
-          <div class="card-title">กลุ่มปัญหาต่อ Product (Top 7)</div>
+          <div class="card-title"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14" height="14"><path d="M20.59 13.41l-7.17 7.17a2 2 0 01-2.83 0L2 12V2h10l8.59 8.59a2 2 0 010 2.82z"/><line x1="7" y1="7" x2="7.01" y2="7"/></svg>กลุ่มปัญหาต่อ Product (Top 7)</div>
           <div class="chart-wrap" style="height:240px"><canvas id="cProdType"></canvas></div>
         </div>
       </div>
       <div class="card" style="margin-bottom:16px">
-        <div class="card-title">สถานะรายโรงพยาบาล × Product</div>
+        <div class="card-title"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14" height="14"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>สถานะรายโรงพยาบาล × Product</div>
         <div id="prodMatrix" style="margin-top:6px"><div class="empty">ดึงข้อมูลก่อน</div></div>
       </div>
       <div class="card">
-        <div class="card-title" style="display:flex;align-items:center;justify-content:space-between">
-          อัตราแก้ไขปัญหา รายโรงพยาบาล
-          <span style="font-size:10px;font-family:var(--mono);color:var(--tx3)">(คลิกกราฟเพื่อดูรายละเอียด)</span>
+        <div class="card-title" style="justify-content:space-between">
+          <span style="display:flex;align-items:center;gap:7px"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14" height="14" style="opacity:.75"><circle cx="12" cy="8" r="6"/><path d="M15.477 12.89L17 22l-5-3-5 3 1.523-9.11"/></svg>อัตราแก้ไขปัญหา รายโรงพยาบาล</span>
+          <span style="font-size:10px;font-family:var(--mono);color:var(--tx3);font-weight:400;letter-spacing:0;text-transform:none">(คลิกกราฟเพื่อดูรายละเอียด)</span>
         </div>
         <div class="chart-wrap" style="height:240px"><canvas id="cHospRate"></canvas></div>
       </div>
@@ -342,21 +334,40 @@
     </div>
 
     <!-- ════════════════════════════════════
-         VIEW: Manage Hospitals
+         VIEW: Settings
     ════════════════════════════════════ -->
-    <div class="view" id="view-hospitals">
+    <div class="view" id="view-settings">
+
+      <!-- Settings Tab Bar -->
+      <div class="stab-bar">
+        <button class="stab-btn active" id="stbtn-hospitals" onclick="switchStab('hospitals')">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+          จัดการโรงพยาบาล
+        </button>
+        <button class="stab-btn" id="stbtn-colmap" onclick="requireAdmin(function(){_openMap();updateLockBtn();})">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 013 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>
+          Column Mapping
+        </button>
+        <button class="stab-btn" id="stbtn-user" onclick="switchStab('user')">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/></svg>
+          ผู้ใช้งาน / รหัสผ่าน
+        </button>
+      </div>
+
+      <!-- ── Pane: Hospitals ── -->
+      <div id="stpane-hospitals" class="stab-pane">
 
       <!-- Supabase connection card -->
       <div class="card" style="margin-bottom:16px">
-        <div class="card-title" style="display:flex;align-items:center;gap:8px;margin-bottom:14px">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14" height="14" style="color:var(--tl);flex-shrink:0">
+        <div class="card-title" style="margin-bottom:14px">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14" height="14" style="color:var(--tl)">
             <ellipse cx="12" cy="5" rx="9" ry="3"/>
             <path d="M21 12c0 1.66-4 3-9 3s-9-1.34-9-3"/>
             <path d="M3 5v14c0 1.66 4 3 9 3s9-1.34 9-3V5"/>
           </svg>
           Supabase Database
-          <span id="sbStatusDot"  style="width:8px;height:8px;border-radius:50%;background:var(--tx3);display:inline-block;flex-shrink:0;transition:background .3s"></span>
-          <span id="sbStatusText" style="font-size:10px;color:var(--tx3);font-weight:400;font-family:var(--mono)">ยังไม่ได้เชื่อมต่อ</span>
+          <span id="sbStatusDot"  style="width:8px;height:8px;border-radius:50%;background:var(--tx3);display:inline-block;flex-shrink:0;transition:background .3s;margin-left:4px"></span>
+          <span id="sbStatusText" style="font-size:10px;color:var(--tx3);font-weight:400;font-family:var(--mono);letter-spacing:0;text-transform:none">ยังไม่ได้เชื่อมต่อ</span>
         </div>
         <details style="margin-bottom:14px">
           <summary style="cursor:pointer;font-size:11px;color:var(--ac);font-family:var(--mono);outline:none;user-select:none;list-style:none">▶ SQL สำหรับสร้าง Table ใน Supabase</summary>
@@ -400,7 +411,7 @@ create policy "Allow all" on public.app_config
 
       <!-- Add hospital card -->
       <div class="card" style="margin-bottom:16px">
-        <div class="card-title">เพิ่มโรงพยาบาล &amp; Product</div>
+        <div class="card-title"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14" height="14"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="16"/><line x1="8" y1="12" x2="16" y2="12"/></svg>เพิ่มโรงพยาบาล &amp; Product</div>
         <div class="info-box" style="margin-bottom:14px">
           <strong>วิธีใช้:</strong> ใส่ชื่อ รพ. ครั้งเดียว → กด <strong>+ เพิ่ม Product</strong> ได้หลายรอบ → กด <strong>บันทึกทั้งหมด</strong> &bull; GID ดึงอัตโนมัติจาก URL
         </div>
@@ -464,6 +475,7 @@ create policy "Allow all" on public.app_config
       <!-- Hospital list card -->
       <div class="card">
         <div class="card-title" style="margin-bottom:12px">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14" height="14"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/></svg>
           โรงพยาบาล (<span id="hospCount">0</span> แห่ง, <span id="sheetCount">0</span> Sheets)
         </div>
         <div class="hosp-list" id="hospList">
@@ -474,12 +486,10 @@ create policy "Allow all" on public.app_config
         </div>
       </div>
 
-    </div><!-- /view-hospitals -->
+      </div><!-- /stpane-hospitals -->
 
-    <!-- ════════════════════════════════════
-         VIEW: User Settings
-    ════════════════════════════════════ -->
-    <div class="view" id="view-user">
+      <!-- ── Pane: User ── -->
+      <div id="stpane-user" class="stab-pane" style="display:none">
 
       <!-- Admin status banner -->
       <div class="card" style="margin-bottom:16px;display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap">
@@ -500,7 +510,7 @@ create policy "Allow all" on public.app_config
 
       <!-- Set / Change password -->
       <div class="card">
-        <div class="card-title">ตั้งค่ารหัสผ่าน Admin</div>
+        <div class="card-title"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14" height="14"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0110 0v4"/></svg>ตั้งค่ารหัสผ่าน Admin</div>
         <div class="info-box" style="margin-bottom:16px">
           รหัสผ่านนี้ใช้ป้องกันการเข้า <strong>ตั้งค่า</strong> เท่านั้น ผู้อื่นยังดูข้อมูลได้ปกติ &bull; รหัสผ่านเก็บในเครื่องนี้ (localStorage)
         </div>
@@ -524,7 +534,9 @@ create policy "Allow all" on public.app_config
         </div>
       </div>
 
-    </div><!-- /view-user -->
+      </div><!-- /stpane-user -->
+
+    </div><!-- /view-settings -->
 
   </div><!-- /content -->
 </div><!-- /main -->
