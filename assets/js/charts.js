@@ -151,10 +151,10 @@ function renderCharts() {
         + '<span style="font-family:var(--mono);font-size:15px;font-weight:700;color:var(--tx)">' + tot + '</span>'
         + '<span style="font-size:9px;font-family:var(--mono);color:var(--tx3);margin-left:1px">ข้อ</span>'
         + '</div>'
-        + '<div style="font-size:10px;font-family:var(--mono);display:grid;grid-template-columns:auto 1fr;row-gap:3px;column-gap:8px">'
-        + '<span style="color:#f04060">รอ</span><span style="color:var(--tx);font-weight:600;text-align:right">' + oc + ' ข้อ</span>'
-        + '<span style="color:#f5a623">แก้ไข</span><span style="color:var(--tx);font-weight:600;text-align:right">' + pgc + ' ข้อ</span>'
-        + '<span style="color:#22c97a">เสร็จ</span><span style="color:var(--tx);font-weight:600;text-align:right">' + dc + ' ข้อ</span>'
+        + '<div style="font-size:10px;font-family:var(--mono);display:flex;gap:10px;flex-wrap:wrap">'
+        + '<span><span style="color:#f04060">รอ </span><span style="color:var(--tx);font-weight:600">' + oc + '</span></span>'
+        + '<span><span style="color:#f5a623">แก้ไข </span><span style="color:var(--tx);font-weight:600">' + pgc + '</span></span>'
+        + '<span><span style="color:#22c97a">เสร็จ </span><span style="color:var(--tx);font-weight:600">' + dc + '</span></span>'
         + '</div></div></td>';
     }
     mh += '</tr>';
