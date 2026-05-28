@@ -62,7 +62,7 @@ function initApp() {
   initSb();
 
   // restore theme
-  var th = localStorage.getItem('bms-theme') || 'dark';
+  var th = localStorage.getItem('bms-theme') || 'light';
   setTheme(th);
 
   // restore auto-refresh
