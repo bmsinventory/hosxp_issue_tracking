@@ -133,22 +133,28 @@ function renderCharts() {
       var sh2 = null;
       for (var si = 0; si < h.sheets.length; si++) if (h.sheets[si].product === allP[pi]) { sh2 = h.sheets[si]; break; }
       if (!sh2) { mh += '<td style="padding:8px 14px;border-bottom:1px solid var(--bdr);text-align:center"><span style="color:var(--bdr);font-size:18px;letter-spacing:-.05em">—</span></td>'; continue; }
-      var oc = 0, dc = 0, tot = sh2.issues.length;
+      var oc = 0, pgc = 0, wc = 0, dc = 0, tot = sh2.issues.length;
       for (var k = 0; k < sh2.issues.length; k++) {
-        if (sh2.issues[k].status === 'รอดำเนินการ') oc++;
-        if (sh2.issues[k].status === 'เสร็จแล้ว')   dc++;
+        var ks = sh2.issues[k].status;
+        if      (ks === 'รอดำเนินการ') oc++;
+        else if (ks === 'กำลังแก้ไข')  pgc++;
+        else if (ks === 'รอตอบกลับ')   wc++;
+        else if (ks === 'เสร็จแล้ว')   dc++;
       }
-      var rt   = tot ? Math.round(dc / tot * 100) : 0;
       var dotC = oc > 0 ? '#f04060' : (dc === tot && tot > 0) ? '#22c97a' : '#f5a623';
       var bgC  = oc > 0 ? 'rgba(240,64,96,.08)' : (dc === tot && tot > 0) ? 'rgba(34,201,122,.08)' : 'rgba(245,166,35,.07)';
       var _pn  = allP[pi].replace(/\\/g, '\\\\').replace(/'/g, "\\'");
-      mh += '<td style="padding:6px 14px;border-bottom:1px solid var(--bdr);text-align:center">'
-        + '<div class="matrix-cell" onclick="showHospProdPopup(\'' + _hn + '\',\'' + _pn + '\')" title="' + h.name + ' — ' + allP[pi] + '" style="display:inline-block;background:' + bgC + ';border:1px solid ' + dotC + '30;border-radius:8px;padding:7px 12px;min-width:80px">'
-        + '<div style="display:flex;align-items:center;justify-content:center;gap:5px;margin-bottom:4px">'
-        + '<span style="width:7px;height:7px;border-radius:50%;background:' + dotC + ';flex-shrink:0;box-shadow:0 0 6px ' + dotC + '80"></span>'
-        + '<span style="font-family:var(--mono);font-size:16px;font-weight:700;color:var(--tx)">' + tot + '</span></div>'
-        + '<div style="font-size:10px;font-family:var(--mono);color:var(--tx3);line-height:1.4">'
-        + (oc > 0 ? '<span style="color:#f04060;font-weight:600">' + oc + ' รอ</span>  ' : '') + rt + '%'
+      mh += '<td style="padding:6px 10px;border-bottom:1px solid var(--bdr);text-align:center">'
+        + '<div class="matrix-cell" onclick="showHospProdPopup(\'' + _hn + '\',\'' + _pn + '\')" title="' + h.name + ' — ' + allP[pi] + '" style="display:inline-block;background:' + bgC + ';border:1px solid ' + dotC + '30;border-radius:8px;padding:8px 12px;min-width:105px;text-align:left">'
+        + '<div style="display:flex;align-items:center;gap:5px;margin-bottom:7px;padding-bottom:6px;border-bottom:1px solid ' + dotC + '25">'
+        + '<span style="width:6px;height:6px;border-radius:50%;background:' + dotC + ';flex-shrink:0;box-shadow:0 0 5px ' + dotC + '80"></span>'
+        + '<span style="font-family:var(--mono);font-size:15px;font-weight:700;color:var(--tx)">' + tot + '</span>'
+        + '<span style="font-size:9px;font-family:var(--mono);color:var(--tx3);margin-left:1px">ข้อ</span>'
+        + '</div>'
+        + '<div style="font-size:10px;font-family:var(--mono);display:grid;grid-template-columns:auto 1fr;row-gap:3px;column-gap:8px">'
+        + '<span style="color:#f04060">รอ</span><span style="color:var(--tx);font-weight:600;text-align:right">' + oc + ' ข้อ</span>'
+        + '<span style="color:#f5a623">แก้ไข</span><span style="color:var(--tx);font-weight:600;text-align:right">' + pgc + ' ข้อ</span>'
+        + '<span style="color:#22c97a">เสร็จ</span><span style="color:var(--tx);font-weight:600;text-align:right">' + dc + ' ข้อ</span>'
         + '</div></div></td>';
     }
     mh += '</tr>';
