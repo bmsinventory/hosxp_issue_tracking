@@ -58,15 +58,15 @@ async function trackVisit() {
     var map = {};
     if (res.data) res.data.forEach(function (r) { map[r.key] = r.value; });
 
-    var total    = parseInt(map['visit_count'] || '0') + 1;
     var ipsDate  = map['visit_ips_date'] || '';
     var ipsList  = [];
     if (ipsDate === today) {
       try { ipsList = JSON.parse(map['visit_ips_today'] || '[]'); } catch (e) {}
     }
-    var prevTodayCnt = (ipsDate === today ? parseInt(map['visit_today'] || '0') : 0);
     var isNewIp      = ipsList.indexOf(ipHash) < 0;
+    var prevTodayCnt = (ipsDate === today ? parseInt(map['visit_today'] || '0') : 0);
     var todayCnt     = isNewIp ? prevTodayCnt + 1 : prevTodayCnt;
+    var total        = parseInt(map['visit_count'] || '0') + (isNewIp ? 1 : 0);
     if (isNewIp) ipsList.push(ipHash);
 
     var now = new Date().toISOString();
