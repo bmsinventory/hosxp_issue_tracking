@@ -195,20 +195,26 @@
          VIEW: Timeline
     ════════════════════════════════════ -->
     <div class="view" id="view-timeline">
-      <div class="legend">
-        <div class="legend-item"><div class="legend-dot" style="background:var(--rd)"></div>รอดำเนินการ</div>
-        <div class="legend-item"><div class="legend-dot" style="background:var(--am)"></div>กำลังแก้ไข</div>
-        <div class="legend-item"><div class="legend-dot" style="background:var(--gr)"></div>เสร็จแล้ว</div>
-        <div class="legend-item"><div class="legend-dot" style="background:var(--ac)"></div>รวม</div>
+      <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px;margin-bottom:12px">
+        <div class="legend" style="margin-bottom:0">
+          <div class="legend-item"><div class="legend-dot" style="background:var(--rd)"></div>รอดำเนินการ</div>
+          <div class="legend-item"><div class="legend-dot" style="background:var(--am)"></div>กำลังแก้ไข</div>
+          <div class="legend-item"><div class="legend-dot" style="background:var(--gr)"></div>เสร็จแล้ว</div>
+          <div class="legend-item"><div class="legend-dot" style="background:var(--ac)"></div>รวม</div>
+        </div>
+        <div style="display:flex;gap:6px">
+          <button class="btn btn-sm active" id="tlBtnWeek"  onclick="setTlMode('week')">รายสัปดาห์</button>
+          <button class="btn btn-sm"        id="tlBtnMonth" onclick="setTlMode('month')">รายเดือน</button>
+        </div>
       </div>
       <div class="card" style="margin-bottom:16px">
-        <div class="card-title">แนวโน้มปัญหารายสัปดาห์ — ย้อนหลัง 12 สัปดาห์</div>
+        <div class="card-title" id="tlChartTitle">แนวโน้มปัญหา — ย้อนหลัง 12 สัปดาห์</div>
         <div class="chart-wrap" style="height:260px">
           <canvas id="cTimeline" role="img" aria-label="กราฟ timeline">กำลังโหลด...</canvas>
         </div>
       </div>
-      <div class="card">
-        <div class="card-title">สรุปรายสัปดาห์</div>
+      <div class="card" style="margin-bottom:16px">
+        <div class="card-title">สรุปรายช่วงเวลา</div>
         <div id="weekBars">
           <div class="empty">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
@@ -216,6 +222,7 @@
           </div>
         </div>
       </div>
+      <div class="card" id="monthCompare" style="display:none"></div>
     </div>
 
     <!-- ════════════════════════════════════
@@ -286,6 +293,24 @@
          VIEW: All Issues
     ════════════════════════════════════ -->
     <div class="view" id="view-all">
+      <!-- Search + Export row -->
+      <div class="search-row">
+        <div class="search-wrap">
+          <svg class="search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14" height="14"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+          <input id="fSearch" type="search" class="search-input" placeholder="ค้นหาปัญหา หน่วยงาน กลุ่มปัญหา..." oninput="renderAll()">
+        </div>
+        <input type="date" id="fDateFrom" onchange="renderAll()" title="ตั้งแต่วันที่" class="date-input">
+        <span style="font-size:11px;color:var(--tx3);white-space:nowrap;align-self:center">ถึง</span>
+        <input type="date" id="fDateTo"   onchange="renderAll()" title="ถึงวันที่"     class="date-input">
+        <button class="btn btn-sm" onclick="clearAllFilters()" title="ล้างตัวกรองทั้งหมด">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="13" height="13"><path d="M3 6h18M8 6V4h8v2M19 6l-1 14H6L5 6"/></svg>
+          <span class="btn-text">ล้าง</span>
+        </button>
+        <button class="btn btn-sm" onclick="exportCSV()" title="ดาวน์โหลด CSV" style="color:var(--gr);border-color:rgba(34,201,122,.3)">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="13" height="13"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+          <span class="btn-text">CSV</span>
+        </button>
+      </div>
       <div class="filter-row">
         <select id="fHosp"    onchange="onHospFilterChange()"><option value="">โรงพยาบาลทั้งหมด</option></select>
         <select id="fProduct" onchange="renderAll()"><option value="">Product ทั้งหมด</option></select>
@@ -391,16 +416,16 @@ create policy "Allow all" on public.app_config
         <div style="background:var(--bg3);border:1px solid var(--bdr);border-radius:var(--r);padding:14px;margin-bottom:12px">
           <div style="font-size:10px;font-family:var(--mono);color:var(--tx3);letter-spacing:.06em;text-transform:uppercase;margin-bottom:10px">เพิ่ม Product</div>
           <div style="display:flex;gap:10px;align-items:flex-end;flex-wrap:wrap">
-            <div class="field" style="width:180px">
+            <div class="field" style="width:200px">
               <label>Product</label>
-              <select id="hospProduct">
-                <option value="">-- เลือก --</option>
-                <option>HOSxP XE</option>
-                <option>ระบบคลังสินค้า</option>
-                <option>ระบบครุภัณฑ์</option>
-                <option>ระบบบัญชี Account</option>
-                <option>IPD Paperless</option>
-              </select>
+              <input id="hospProduct" list="productListData" placeholder="เลือกหรือพิมพ์ชื่อ..." autocomplete="off">
+              <datalist id="productListData">
+                <option value="HOSxP XE">
+                <option value="ระบบคลังสินค้า">
+                <option value="ระบบครุภัณฑ์">
+                <option value="ระบบบัญชี Account">
+                <option value="IPD Paperless">
+              </datalist>
             </div>
             <div class="field" style="flex:1;min-width:240px">
               <label>ลิงก์ Google Sheets</label>

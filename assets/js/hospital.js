@@ -3,6 +3,30 @@
 var pendingProducts = [];
 var editingSheet    = null;
 
+var PRESET_PRODUCTS = ['HOSxP XE','ระบบคลังสินค้า','ระบบครุภัณฑ์','ระบบบัญชี Account','IPD Paperless'];
+
+/* ── Product Datalist ── */
+
+function updateProductDatalist() {
+  var dl = document.getElementById('productListData');
+  if (!dl) return;
+  var all = PRESET_PRODUCTS.slice();
+  /* Custom products saved in state */
+  for (var i = 0; i < customProducts.length; i++) {
+    if (all.indexOf(customProducts[i]) < 0) all.push(customProducts[i]);
+  }
+  /* Products already used in existing hospitals */
+  for (var i = 0; i < hospitals.length; i++) {
+    for (var j = 0; j < hospitals[i].sheets.length; j++) {
+      var p = hospitals[i].sheets[j].product;
+      if (p && all.indexOf(p) < 0) all.push(p);
+    }
+  }
+  dl.innerHTML = all.map(function (p) {
+    return '<option value="' + escHtml(p) + '">';
+  }).join('');
+}
+
 /* ── Edit Sheet (inline) ── */
 
 function toggleEditSheet(hi, si) {
@@ -57,7 +81,7 @@ function stagePendingProduct() {
   var gid     = document.getElementById('sheetGid').value.trim() || '0';
 
   if (!name)    { toast('กรุณาใส่ชื่อโรงพยาบาล', 'error'); return; }
-  if (!product) { toast('กรุณาเลือก Product',    'error'); return; }
+  if (!product) { toast('กรุณาใส่ชื่อ Product',    'error'); return; }
 
   for (var i = 0; i < pendingProducts.length; i++) {
     if (pendingProducts[i].product === product) { toast('เพิ่ม ' + product + ' ซ้ำแล้ว', 'error'); return; }
@@ -70,6 +94,13 @@ function stagePendingProduct() {
         }
       }
     }
+  }
+
+  /* Save new custom product to state if not a preset */
+  if (PRESET_PRODUCTS.indexOf(product) < 0 && customProducts.indexOf(product) < 0) {
+    customProducts.push(product);
+    saveState();
+    updateProductDatalist();
   }
 
   pendingProducts.push({ product: product, url: url, gid: gid });
@@ -147,6 +178,7 @@ async function saveAllPending() {
     document.getElementById('sheetGid').value    = '0';
     renderHospList();
     saveState();
+    updateProductDatalist();
     toast('บันทึก ' + name + ' — ' + ok + ' Product สำเร็จ' + (fail > 0 ? ' (ล้มเหลว ' + fail + ')' : ''), 'success');
   }
 }
@@ -167,6 +199,20 @@ async function removeSheet(hi, si) {
   updateMetrics();
   saveState();
   toast('ลบ ' + h.name + ' — ' + (sh.product || 'Sheet') + ' แล้ว', '');
+}
+
+/* ── Format last sync time ── */
+
+function formatSyncTime(ts) {
+  if (!ts) return null;
+  var d    = new Date(ts);
+  var now  = new Date();
+  var diff = Math.floor((now - d) / 60000);
+  if (diff < 1)  return 'เพิ่งดึง';
+  if (diff < 60) return diff + ' นาทีที่แล้ว';
+  var hh = d.toLocaleTimeString('th-TH', { hour: '2-digit', minute: '2-digit' });
+  var dd = d.toLocaleDateString('th-TH', { day: 'numeric', month: 'short' });
+  return hh + ' ' + dd;
 }
 
 /* ── Render Hospital List ── */
@@ -217,12 +263,14 @@ function renderHospList() {
         if (sh.issues[k].status === 'รอดำเนินการ' || sh.issues[k].status === 'รอตอบกลับ') open++;
         if (sh.issues[k].status === 'เสร็จแล้ว') done++;
       }
-      var rate = sh.issues.length ? Math.round(done / sh.issues.length * 100) : 0;
-      var statTxt = '';
+      var rate      = sh.issues.length ? Math.round(done / sh.issues.length * 100) : 0;
+      var syncLabel = formatSyncTime(sh.lastSyncAt);
+      var statTxt   = '';
       if      (sh.status === 'ok')      statTxt = '<span style="color:var(--tx3)">' + sh.issues.length + ' รายการ</span><span style="color:' + (open > 0 ? 'var(--rd)' : 'var(--gr)') + '">' + (open > 0 ? open + ' รอ' : 'ครบ') + '</span><span style="color:var(--tx3)">' + rate + '%</span>';
       else if (sh.status === 'loading') statTxt = '<span style="color:var(--am)">กำลังโหลด...</span>';
       else if (sh.status === 'error')   statTxt = '<span style="color:var(--rd)">ดึงไม่ได้</span>';
       else                              statTxt = '<span style="color:var(--tx3)">รอดึงข้อมูล</span>';
+      if (syncLabel) statTxt += '<span style="font-size:10px;color:var(--tx3);font-family:var(--mono)">' + syncLabel + '</span>';
 
       var urlTxt    = sh.url || '(ยังไม่ได้ใส่ลิงก์)';
       var isEditing = (editingSheet && editingSheet.hi === i && editingSheet.si === j);
@@ -232,6 +280,12 @@ function renderHospList() {
       html += '<span class="prod-badge">' + sh.product + '</span>';
       html += '<span style="font-size:11px;color:var(--tx3);font-family:var(--mono);flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="' + escHtml(sh.url) + '">' + escHtml(urlTxt.replace('https://docs.google.com/spreadsheets/d/', '…/spreadsheets/d/')) + '</span>';
       html += '<div style="display:flex;gap:8px;font-size:11px;font-family:var(--mono);white-space:nowrap">' + statTxt + '</div>';
+      /* Open Sheet link */
+      if (sh.url) {
+        html += '<a class="btn btn-sm btn-icon" href="' + escHtml(sh.url) + '" target="_blank" rel="noopener noreferrer" title="เปิด Google Sheet" style="color:var(--ac);border-color:rgba(61,142,248,.25)">'
+          + '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="12" height="12"><path d="M18 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>'
+          + '</a>';
+      }
       html += '<button class="btn btn-sm btn-icon" onclick="toggleEditSheet(' + i + ',' + j + ')" title="แก้ไขลิงก์"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="12" height="12"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 013 3L7 19l-4 1 1-4L16.5 3.5z"/></svg></button>';
       html += '<button class="btn btn-danger btn-sm btn-icon" onclick="removeSheet(' + i + ',' + j + ')" title="ลบ"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="12" height="12"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 01-2 2H8a2 2 0 01-2-2L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/><path d="M9 6V4h6v2"/></svg></button>';
       html += '</div>';

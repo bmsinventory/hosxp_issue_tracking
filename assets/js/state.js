@@ -6,6 +6,7 @@ var charts               = {};
 var lastDetectedHeaders  = [];
 var lastDetectedStatuses = [];
 var allDetectedHeaders   = {};
+var customProducts       = [];
 
 var colMap = {
   sequence:     'ลำดับ',
@@ -30,11 +31,12 @@ var statusWait = 'รอตอบกลับ,Pending,waiting,Hold,On Hold';
 function saveState() {
   try {
     localStorage.setItem(STORAGE_KEY, JSON.stringify({
-      hospitals:   hospitals,
-      colMap:      colMap,
-      statusDone:  statusDone,
-      statusProg:  statusProg,
-      statusWait:  statusWait
+      hospitals:      hospitals,
+      colMap:         colMap,
+      statusDone:     statusDone,
+      statusProg:     statusProg,
+      statusWait:     statusWait,
+      customProducts: customProducts
     }));
   } catch (e) {}
 }
@@ -59,10 +61,11 @@ function loadState() {
         }
       }
     }
-    if (data.colMap)     colMap     = data.colMap;
-    if (data.statusDone) statusDone = data.statusDone;
-    if (data.statusProg) statusProg = data.statusProg;
-    if (data.statusWait) statusWait = data.statusWait;
+    if (data.colMap)                            colMap         = data.colMap;
+    if (data.statusDone)                        statusDone     = data.statusDone;
+    if (data.statusProg)                        statusProg     = data.statusProg;
+    if (data.statusWait)                        statusWait     = data.statusWait;
+    if (Array.isArray(data.customProducts))     customProducts = data.customProducts;
   } catch (e) {
     hospitals = [];
   }

@@ -47,6 +47,17 @@ function buildCard(x, showHosp) {
   h += '<div class="ic-head">';
   if (x.sequence)              h += '<span class="ic-seq">#' + x.sequence + '</span>';
   h += '<span class="pill ' + pc + '">' + raw + '</span>';
+
+  /* Aging badge — only for non-done issues with a date */
+  if (x.dateObj && x.status !== 'เสร็จแล้ว') {
+    var days = Math.floor((Date.now() - x.dateObj.getTime()) / 86400000);
+    if (days >= 1) {
+      var ac = days >= 14 ? '#f04060' : days >= 7 ? '#f5a623' : 'var(--tx3)';
+      h += '<span class="aging-badge" style="color:' + ac + ';border-color:' + ac + '">'
+        + days + 'ว. ค้าง</span>';
+    }
+  }
+
   if (x.date && x.date !== '—') h += '<span class="ic-date">' + x.date + '</span>';
   if (x.type && x.type !== 'ไม่ระบุ') h += '<span class="pill pill-type">' + x.type + '</span>';
   if (x.product)               h += '<span class="prod-badge" style="font-size:9px;padding:1px 6px">' + x.product + '</span>';
@@ -167,10 +178,11 @@ function renderByHosp() {
       html += '</div></div>';
     }
 
+    /* ─ Dept breakdown ─ */
     var deptMap = {};
     for (var k = 0; k < allIss.length; k++) {
       var d = allIss[k].dept;
-      if (d) deptMap[d] = (deptMap[d] || 0) + 1;
+      if (d && d !== '—') deptMap[d] = (deptMap[d] || 0) + 1;
     }
     var depts = [];
     for (var depKey in deptMap) depts.push([depKey, deptMap[depKey]]);
@@ -190,6 +202,33 @@ function renderByHosp() {
       }
       html += '</div></div>';
     }
+
+    /* ─ Issue type breakdown (Top 5) ─ */
+    var typeMap = {};
+    for (var k = 0; k < allIss.length; k++) {
+      var t = allIss[k].type;
+      if (t && t !== 'ไม่ระบุ') typeMap[t] = (typeMap[t] || 0) + 1;
+    }
+    var types = [];
+    for (var tKey in typeMap) types.push([tKey, typeMap[tKey]]);
+    types.sort(function (a, b) { return b[1] - a[1]; });
+    types = types.slice(0, 5);
+    if (types.length) {
+      var maxType = types[0][1];
+      html += '<div class="hov-dept-section">';
+      html += '<div class="hov-dept-header">กลุ่มปัญหาสูงสุด</div>';
+      html += '<div class="hov-dept-grid">';
+      for (var ti = 0; ti < types.length; ti++) {
+        var tBarW = Math.max(4, Math.round(types[ti][1] / maxType * 100));
+        html += '<div class="hov-dept-item">';
+        html += '<span class="hov-dept-name" title="' + escHtml(types[ti][0]) + '">' + escHtml(types[ti][0]) + '</span>';
+        html += '<div class="hov-dept-bar-wrap"><div class="hov-dept-bar-fill" style="width:' + tBarW + '%;background:var(--ac)"></div></div>';
+        html += '<span class="hov-dept-num">' + types[ti][1] + '</span>';
+        html += '</div>';
+      }
+      html += '</div></div>';
+    }
+
     html += '</div></div>';
   }
   el.innerHTML = html || '<div class="empty">ยังไม่มีข้อมูล</div>';
@@ -209,6 +248,17 @@ function showHospProdPopup(hospName, product) {
   }
   var title = (product ? hospName + ' — ' + product : hospName) + ' (' + issues.length + ' รายการ)';
   showChartPopup(title, buildIssueListPopup(issues));
+}
+
+/* ── Date Input Helper ── */
+
+function parseDateInput(str, endOfDay) {
+  if (!str) return null;
+  var p = str.split('-');
+  if (p.length !== 3) return null;
+  return endOfDay
+    ? new Date(+p[0], +p[1] - 1, +p[2], 23, 59, 59)
+    : new Date(+p[0], +p[1] - 1, +p[2]);
 }
 
 /* ── Filters (Cascading) ── */
@@ -255,15 +305,37 @@ function onHospFilterChange() {
   renderAll();
 }
 
-/* ── All Issues View ── */
+function clearAllFilters() {
+  var ids = ['fHosp','fProduct','fDept','fType','fStatus','fWeek'];
+  for (var i = 0; i < ids.length; i++) {
+    var el = document.getElementById(ids[i]);
+    if (el) el.value = '';
+  }
+  var fSearch = document.getElementById('fSearch');
+  var fDateFrom = document.getElementById('fDateFrom');
+  var fDateTo   = document.getElementById('fDateTo');
+  if (fSearch)   fSearch.value   = '';
+  if (fDateFrom) fDateFrom.value = '';
+  if (fDateTo)   fDateTo.value   = '';
+  buildSubFilters(allIssues);
+  renderAll();
+}
 
-function renderAll() {
-  var fh = document.getElementById('fHosp').value;
-  var fp = document.getElementById('fProduct').value;
-  var ft = document.getElementById('fType').value;
-  var fd = document.getElementById('fDept').value;
-  var fs = document.getElementById('fStatus').value;
-  var fw = document.getElementById('fWeek').value;
+/* ── Shared Filter Logic ── */
+
+function getFilteredIssues() {
+  var fh  = document.getElementById('fHosp').value;
+  var fp  = document.getElementById('fProduct').value;
+  var ft  = document.getElementById('fType').value;
+  var fd  = document.getElementById('fDept').value;
+  var fs  = document.getElementById('fStatus').value;
+  var fw  = document.getElementById('fWeek').value;
+  var fsr = document.getElementById('fSearch');
+  var fdf = document.getElementById('fDateFrom');
+  var fdt = document.getElementById('fDateTo');
+  var sq  = fsr ? fsr.value.trim().toLowerCase() : '';
+  var df  = parseDateInput(fdf ? fdf.value : '');
+  var dt  = parseDateInput(fdt ? fdt.value : '', true);
 
   var iss = [];
   for (var i = 0; i < allIssues.length; i++) {
@@ -274,9 +346,23 @@ function renderAll() {
     if (fd && x.dept      !== fd) continue;
     if (fs && x.rawStatus !== fs) continue;
     if (fw && x.weekKey   !== fw) continue;
+    if (sq) {
+      var hay = [(x.topic||''),(x.dept||''),(x.type||''),(x.hospital||''),(x.fixMethod||''),(x.reporter||'')].join(' ').toLowerCase();
+      if (hay.indexOf(sq) < 0) continue;
+    }
+    if (df && x.dateObj && x.dateObj < df) continue;
+    if (dt && x.dateObj && x.dateObj > dt) continue;
     iss.push(x);
   }
+  return iss;
+}
 
+/* ── All Issues View ── */
+
+function renderAll() {
+  var iss = getFilteredIssues();
+
+  /* Stats strip */
   var sc = document.getElementById('fstatStrip');
   if (sc) {
     var stOpen = 0, stProg = 0, stWait = 0, stDone = 0;
@@ -302,6 +388,38 @@ function renderAll() {
   var html = '';
   for (var i = 0; i < iss.length; i++) html += buildCard(iss[i], hospitals.length > 1);
   el.innerHTML = html;
+}
+
+/* ── Export CSV ── */
+
+function exportCSV() {
+  var iss = getFilteredIssues();
+  if (!iss.length) { toast('ไม่มีข้อมูลที่จะดาวน์โหลด', 'error'); return; }
+
+  var headers = ['ลำดับ','โรงพยาบาล','Product','วันที่','หน่วยงาน','ปัญหา','กลุ่มปัญหา','สถานะ','วิธีการแก้ไข','ผู้แจ้งปัญหา','ผู้รับปัญหา','ผู้แก้ไข','วันที่แก้ไข'];
+  var rows = [headers];
+  for (var i = 0; i < iss.length; i++) {
+    var x = iss[i];
+    rows.push([
+      x.sequence || '', x.hospital || '', x.product || '', x.date || '',
+      x.dept || '', x.topic || '', x.type || '', x.rawStatus || x.status || '',
+      x.fixMethod || '', x.reporter || '', x.assignee || '', x.resolver || '', x.resolvedDate || ''
+    ]);
+  }
+  var csv = rows.map(function (r) {
+    return r.map(function (v) { return '"' + String(v).replace(/"/g, '""') + '"'; }).join(',');
+  }).join('\r\n');
+
+  var blob = new Blob(['﻿' + csv], { type: 'text/csv;charset=utf-8;' });
+  var url  = URL.createObjectURL(blob);
+  var a    = document.createElement('a');
+  a.href   = url;
+  a.download = 'bms_issues_' + new Date().toISOString().slice(0, 10) + '.csv';
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+  toast('ดาวน์โหลด ' + iss.length + ' รายการแล้ว', 'success');
 }
 
 /* ── Column Mapping Modal ── */

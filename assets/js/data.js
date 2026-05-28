@@ -180,6 +180,7 @@ function fetchSheet(h, sh, cb) {
     .then(function (text) {
       sh.issues = parseSheet(text, h.name, sh.product);
       sh.status = 'ok';
+      sh.lastSyncAt = Date.now();
       allDetectedHeaders[key] = lastDetectedHeaders;
       cb();
     })

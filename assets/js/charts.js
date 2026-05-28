@@ -1,5 +1,29 @@
 /* ── Charts & Visualizations ── */
 
+var _tlMode = 'week';
+
+function setTlMode(mode) {
+  _tlMode = mode;
+  var bW = document.getElementById('tlBtnWeek');
+  var bM = document.getElementById('tlBtnMonth');
+  if (bW) bW.classList.toggle('active', mode === 'week');
+  if (bM) bM.classList.toggle('active', mode === 'month');
+  renderTimeline();
+}
+
+/* ── Date key helpers for monthly view ── */
+
+function monthKeyFromDate(d) {
+  return d.getFullYear() + '-' + ('0' + (d.getMonth() + 1)).slice(-2);
+}
+
+function monthDisplayLabel(key) {
+  var thMonths = ['ม.ค.','ก.พ.','มี.ค.','เม.ย.','พ.ค.','มิ.ย.','ก.ค.','ส.ค.','ก.ย.','ต.ค.','พ.ย.','ธ.ค.'];
+  var p = key.split('-');
+  var be = (parseInt(p[0]) + 543) % 100;
+  return thMonths[parseInt(p[1]) - 1] + ' \'' + (be < 10 ? '0' : '') + be;
+}
+
 function destroyChart(id) {
   if (charts[id]) { charts[id].destroy(); delete charts[id]; }
 }
@@ -217,8 +241,19 @@ function renderTimeline() {
   var dated = allIssues.filter(function (x) { return x.dateObj; });
   if (!dated.length) {
     document.getElementById('weekBars').innerHTML = '<div class="empty">ไม่พบวันที่ที่อ่านได้ — ตรวจสอบ Column Mapping</div>';
+    renderMonthComparison();
     return;
   }
+
+  if (_tlMode === 'month') {
+    renderTimelineMonthly(dated);
+  } else {
+    renderTimelineWeekly(dated);
+  }
+  renderMonthComparison();
+}
+
+function renderTimelineWeekly(dated) {
   var wm = {};
   for (var i = 0; i < dated.length; i++) {
     var x = dated[i], wk = x.weekKey;
@@ -232,18 +267,40 @@ function renderTimeline() {
   for (var k in wm) wks.push(wm[k]);
   wks.sort(function (a, b) { return new Date(a.key) - new Date(b.key); });
   if (wks.length > 12) wks = wks.slice(wks.length - 12);
-  var labels = wks.map(function (w) { return w.label; });
+  _renderTimelineChart(wks.map(function (w) { return w.label; }), wks, 'สัปดาห์');
+  _renderWeekBars(wks);
+}
 
+function renderTimelineMonthly(dated) {
+  var mm = {};
+  for (var i = 0; i < dated.length; i++) {
+    var x  = dated[i];
+    var mk = monthKeyFromDate(x.dateObj);
+    if (!mm[mk]) mm[mk] = { key: mk, label: monthDisplayLabel(mk), total: 0, open: 0, prog: 0, done: 0 };
+    mm[mk].total++;
+    if      (x.status === 'รอดำเนินการ') mm[mk].open++;
+    else if (x.status === 'กำลังแก้ไข')  mm[mk].prog++;
+    else if (x.status === 'เสร็จแล้ว')   mm[mk].done++;
+  }
+  var months = [];
+  for (var k in mm) months.push(mm[k]);
+  months.sort(function (a, b) { return a.key > b.key ? 1 : -1; });
+  if (months.length > 12) months = months.slice(months.length - 12);
+  _renderTimelineChart(months.map(function (m) { return m.label; }), months, 'เดือน');
+  _renderWeekBars(months);
+}
+
+function _renderTimelineChart(labels, periods, unit) {
   destroyChart('cTimeline');
   charts.cTimeline = new Chart(document.getElementById('cTimeline'), {
     type: 'line',
     data: {
       labels: labels,
       datasets: [
-        { label: 'รอดำเนินการ', data: wks.map(function (w) { return w.open; }),  borderColor: '#f04060', backgroundColor: 'rgba(240,64,96,.08)', tension: .4, fill: true,  pointRadius: 4, pointHoverRadius: 6, borderWidth: 2 },
-        { label: 'กำลังแก้ไข',  data: wks.map(function (w) { return w.prog; }),  borderColor: '#f5a623', backgroundColor: 'rgba(245,166,35,.05)', tension: .4, fill: false, pointRadius: 4, pointHoverRadius: 6, borderWidth: 2, borderDash: [5, 3] },
-        { label: 'เสร็จแล้ว',   data: wks.map(function (w) { return w.done; }),  borderColor: '#22c97a', backgroundColor: 'rgba(34,201,122,.05)', tension: .4, fill: false, pointRadius: 4, pointHoverRadius: 6, borderWidth: 2 },
-        { label: 'รวม',          data: wks.map(function (w) { return w.total; }), borderColor: '#3d8ef8', backgroundColor: 'rgba(61,142,248,.04)', tension: .4, fill: false, pointRadius: 3, pointHoverRadius: 5, borderWidth: 1.5, borderDash: [2, 2] }
+        { label: 'รอดำเนินการ', data: periods.map(function (w) { return w.open; }),  borderColor: '#f04060', backgroundColor: 'rgba(240,64,96,.08)', tension: .4, fill: true,  pointRadius: 4, pointHoverRadius: 6, borderWidth: 2 },
+        { label: 'กำลังแก้ไข',  data: periods.map(function (w) { return w.prog; }),  borderColor: '#f5a623', backgroundColor: 'rgba(245,166,35,.05)', tension: .4, fill: false, pointRadius: 4, pointHoverRadius: 6, borderWidth: 2, borderDash: [5, 3] },
+        { label: 'เสร็จแล้ว',   data: periods.map(function (w) { return w.done; }),  borderColor: '#22c97a', backgroundColor: 'rgba(34,201,122,.05)', tension: .4, fill: false, pointRadius: 4, pointHoverRadius: 6, borderWidth: 2 },
+        { label: 'รวม',          data: periods.map(function (w) { return w.total; }), borderColor: '#3d8ef8', backgroundColor: 'rgba(61,142,248,.04)', tension: .4, fill: false, pointRadius: 3, pointHoverRadius: 5, borderWidth: 1.5, borderDash: [2, 2] }
       ]
     },
     options: {
@@ -256,14 +313,16 @@ function renderTimeline() {
       }
     }
   });
+}
 
+function _renderWeekBars(periods) {
   var mx = 1;
-  for (var i = 0; i < wks.length; i++) if (wks[i].total > mx) mx = wks[i].total;
-  var rev  = wks.slice().reverse();
+  for (var i = 0; i < periods.length; i++) if (periods[i].total > mx) mx = periods[i].total;
+  var rev  = periods.slice().reverse();
   var bars = '';
   for (var i = 0; i < rev.length; i++) {
     var w    = rev[i];
-    var rate = Math.round(w.done / w.total * 100);
+    var rate = w.total ? Math.round(w.done / w.total * 100) : 0;
     var rc   = rate >= 60 ? '#22c97a' : rate >= 30 ? '#f5a623' : '#f04060';
     bars += '<div class="week-bar">'
       + '<div class="week-lbl">' + w.label + '</div>'
@@ -276,6 +335,72 @@ function renderTimeline() {
       + '</div>';
   }
   document.getElementById('weekBars').innerHTML = bars || '<div class="empty">ไม่มีข้อมูล</div>';
+}
+
+/* ── Month Comparison Strip ── */
+
+function renderMonthComparison() {
+  var el = document.getElementById('monthCompare');
+  if (!el) return;
+  if (!allIssues.length) { el.style.display = 'none'; return; }
+
+  var now   = new Date();
+  var thisM = monthKeyFromDate(now);
+  var prev  = new Date(now.getFullYear(), now.getMonth() - 1, 1);
+  var prevM = monthKeyFromDate(prev);
+
+  var thisNew = 0, thisDone = 0, thisOpen = 0;
+  var prevNew = 0, prevDone = 0, prevOpen = 0;
+
+  for (var i = 0; i < allIssues.length; i++) {
+    var x = allIssues[i];
+    if (!x.dateObj) continue;
+    var mk = monthKeyFromDate(x.dateObj);
+    if (mk === thisM) {
+      thisNew++;
+      if (x.status === 'เสร็จแล้ว')   thisDone++;
+      if (x.status === 'รอดำเนินการ') thisOpen++;
+    }
+    if (mk === prevM) {
+      prevNew++;
+      if (x.status === 'เสร็จแล้ว')   prevDone++;
+      if (x.status === 'รอดำเนินการ') prevOpen++;
+    }
+  }
+
+  var thisRate = thisNew ? Math.round(thisDone / thisNew * 100) : 0;
+  var prevRate = prevNew ? Math.round(prevDone / prevNew * 100) : 0;
+  var thisLabel = monthDisplayLabel(thisM);
+  var prevLabel = monthDisplayLabel(prevM);
+
+  function statCell(label, val, color) {
+    return '<div style="text-align:center;padding:0 12px">'
+      + '<div style="font-size:20px;font-weight:700;font-family:var(--mono);color:' + color + '">' + val + '</div>'
+      + '<div style="font-size:10px;color:var(--tx3);font-family:var(--mono);margin-top:2px">' + label + '</div>'
+      + '</div>';
+  }
+  function monthBlock(title, tot, done, open, rate) {
+    var rc = rate >= 60 ? 'var(--gr)' : rate >= 30 ? 'var(--am)' : 'var(--rd)';
+    return '<div style="flex:1;min-width:0;background:var(--bg3);border:1px solid var(--bdr);border-radius:var(--r);padding:14px 16px">'
+      + '<div style="font-size:11px;font-family:var(--mono);color:var(--tx3);margin-bottom:10px;letter-spacing:.04em">' + title + '</div>'
+      + '<div style="display:flex;align-items:center;justify-content:center;flex-wrap:wrap;gap:4px;border-bottom:1px solid var(--bdr);padding-bottom:10px;margin-bottom:6px">'
+      + statCell('รายการ', tot, 'var(--tx)')
+      + '<div style="width:1px;height:28px;background:var(--bdr)"></div>'
+      + statCell('รอ', open, 'var(--rd)')
+      + statCell('เสร็จ', done, 'var(--gr)')
+      + '</div>'
+      + '<div style="display:flex;align-items:center;gap:8px">'
+      + '<div style="flex:1;height:4px;background:var(--bg4);border-radius:2px;overflow:hidden"><div style="height:100%;width:' + rate + '%;background:' + rc + ';border-radius:2px;transition:width .5s"></div></div>'
+      + '<span style="font-size:13px;font-family:var(--mono);font-weight:700;color:' + rc + ';min-width:38px;text-align:right">' + rate + '%</span>'
+      + '</div></div>';
+  }
+
+  el.style.display = '';
+  el.innerHTML = '<div style="font-size:12px;font-weight:600;color:var(--tx);margin-bottom:10px">เปรียบเทียบรายเดือน</div>'
+    + '<div style="display:flex;gap:12px;flex-wrap:wrap">'
+    + monthBlock(thisLabel + ' (เดือนนี้)', thisNew, thisDone, thisOpen, thisRate)
+    + monthBlock(prevLabel + ' (เดือนที่แล้ว)', prevNew, prevDone, prevOpen, prevRate)
+    + '</div>';
 }
 
 /* ── Chart Popup ── */
@@ -423,6 +548,14 @@ function renderPopupPage(page) {
         h += '<div style="padding:6px 0 6px ' + iInd + 'px;border-bottom:1px solid var(--bdr);display:flex;align-items:flex-start;gap:8px">';
         h += '<span style="font-size:10px;font-family:var(--mono);color:var(--tx3);min-width:28px;flex-shrink:0;padding-top:3px;text-align:right">' + sq + '.</span>';
         h += '<span class="pill ' + pc + '" style="font-size:9px;flex-shrink:0">' + x.status + '</span>';
+        /* Aging in popup */
+        if (x.dateObj && x.status !== 'เสร็จแล้ว') {
+          var days = Math.floor((Date.now() - x.dateObj.getTime()) / 86400000);
+          if (days >= 7) {
+            var aclr = days >= 14 ? '#f04060' : '#f5a623';
+            h += '<span style="font-size:9px;font-family:var(--mono);color:' + aclr + ';border:1px solid ' + aclr + '40;border-radius:3px;padding:1px 4px;flex-shrink:0">' + days + 'ว.</span>';
+          }
+        }
         h += '<div style="flex:1;min-width:0">';
         h += '<div style="font-size:13px;color:var(--tx);font-weight:500;white-space:normal">' + escHtml(x.topic || '—') + '</div>';
         var meta = [];

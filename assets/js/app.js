@@ -66,6 +66,7 @@ function postLoad() {
 
 function initApp() {
   loadState();
+  updateProductDatalist();
   renderHospList();
   populateFilters();
   checkResp();
