@@ -18,6 +18,38 @@
 <body>
 
 <!-- ═══════════════════════════════════════════════════════
+     LOGIN SCREEN
+════════════════════════════════════════════════════════ -->
+<div class="login-screen" id="loginScreen">
+  <div class="login-card">
+    <div class="login-logo">
+      <div class="login-logo-icon">M</div>
+      <div>
+        <div class="login-logo-text">BMS IssueTracking</div>
+        <div class="login-logo-sub">ติดตามปัญหาระบบ รพ.</div>
+      </div>
+    </div>
+    <div class="login-title">เข้าสู่ระบบ</div>
+    <div class="login-subtitle">กรุณาเข้าสู่ระบบเพื่อใช้งาน</div>
+    <div class="login-fields">
+      <div class="field">
+        <label>อีเมล์</label>
+        <input id="loginEmail" type="email" placeholder="your@email.com" autocomplete="username">
+      </div>
+      <div class="field">
+        <label>รหัสผ่าน</label>
+        <input id="loginPwd" type="password" placeholder="••••••••" autocomplete="current-password" onkeypress="loginKeyPress(event)">
+      </div>
+    </div>
+    <div class="login-err" id="loginErr"></div>
+    <button class="btn btn-primary" id="loginBtn" onclick="doLogin()" style="width:100%;justify-content:center;padding:10px;font-size:14px">
+      เข้าสู่ระบบ
+    </button>
+    <div class="login-footer">ติดต่อผู้ดูแลระบบเพื่อขอสิทธิ์เข้าถึง</div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════
      SIDEBAR
 ════════════════════════════════════════════════════════ -->
 <aside class="sidebar" id="sidebar">
@@ -62,6 +94,10 @@
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 013 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>
       Column Mapping
     </button>
+    <button class="nav-item" onclick="gotoTab('user',this)">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/></svg>
+      ผู้ใช้งาน
+    </button>
   </nav>
 
   <!-- Theme Switcher -->
@@ -70,6 +106,15 @@
     <div class="tsw tsw-dark  active" id="tsw-dark"  onclick="setTheme('dark')"  title="Dark"></div>
     <div class="tsw tsw-light"        id="tsw-light" onclick="setTheme('light')" title="Light"></div>
     <div class="tsw tsw-ocean"        id="tsw-ocean" onclick="setTheme('ocean')" title="Ocean"></div>
+  </div>
+
+  <!-- Logged-in user -->
+  <div class="sidebar-user">
+    <div class="sidebar-user-avatar" id="sidebarUserAvatar">U</div>
+    <span class="sidebar-user-email" id="sidebarUserEmail">—</span>
+    <button class="sidebar-user-logout" onclick="doLogout()" title="ออกจากระบบ">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="15" height="15"><path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+    </button>
   </div>
 
   <div class="sidebar-footer">
@@ -395,6 +440,63 @@ create policy "Allow all" on public.hospital_sheets
 
     </div><!-- /view-hospitals -->
 
+    <!-- ════════════════════════════════════
+         VIEW: User Settings
+    ════════════════════════════════════ -->
+    <div class="view" id="view-user">
+
+      <!-- User info card -->
+      <div class="user-info-card">
+        <div class="user-info-avatar" id="userViewAvatar">U</div>
+        <div class="user-info-detail">
+          <div class="user-info-email" id="userViewEmail">—</div>
+          <div class="user-info-meta">
+            เข้าสู่ระบบล่าสุด: <span id="userViewLastLogin">—</span><br>
+            User ID: <span id="userViewId">—</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Actions -->
+      <div class="card" style="margin-bottom:16px">
+        <div class="card-title">จัดการบัญชี</div>
+        <div style="display:flex;flex-direction:column;gap:10px">
+          <div style="display:flex;align-items:center;justify-content:space-between;padding:12px 0;border-bottom:1px solid var(--bdr)">
+            <div>
+              <div style="font-size:13px;font-weight:500;color:var(--tx)">รีเซ็ตรหัสผ่าน</div>
+              <div style="font-size:12px;color:var(--tx3);margin-top:3px">ระบบจะส่งลิงก์ไปยังอีเมล์ของคุณ</div>
+            </div>
+            <button class="btn btn-sm" onclick="sendPasswordReset()" style="color:var(--ac);border-color:rgba(61,142,248,.3);white-space:nowrap">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="13" height="13"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0110 0v4"/></svg>
+              ส่งลิงก์รีเซ็ต
+            </button>
+          </div>
+          <div style="display:flex;align-items:center;justify-content:space-between;padding:12px 0">
+            <div>
+              <div style="font-size:13px;font-weight:500;color:var(--rd)">ออกจากระบบ</div>
+              <div style="font-size:12px;color:var(--tx3);margin-top:3px">ระบบจะล้างข้อมูล Session ทั้งหมด</div>
+            </div>
+            <button class="btn btn-sm btn-danger" onclick="doLogout()" style="white-space:nowrap">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="13" height="13"><path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+              ออกจากระบบ
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Admin guide -->
+      <div class="card">
+        <div class="card-title">สำหรับผู้ดูแลระบบ — การจัดการผู้ใช้</div>
+        <div class="info-box" style="margin-bottom:0">
+          <strong>เพิ่มผู้ใช้ใหม่:</strong> ไปที่ Supabase Dashboard → Authentication → Users → Add user<br>
+          <strong>ลบผู้ใช้:</strong> Supabase Dashboard → Authentication → Users → Delete<br>
+          <strong>รีเซ็ตรหัสผ่าน:</strong> Supabase Dashboard → Authentication → Users → Send recovery email<br>
+          <strong>เปิด Email Auth:</strong> Authentication → Providers → Email → Enable
+        </div>
+      </div>
+
+    </div><!-- /view-user -->
+
   </div><!-- /content -->
 </div><!-- /main -->
 
@@ -462,6 +564,7 @@ create policy "Allow all" on public.hospital_sheets
 <script src="assets/js/state.js"></script>
 <script src="assets/js/ui.js"></script>
 <script src="assets/js/supabase.js"></script>
+<script src="assets/js/auth.js"></script>
 <script src="assets/js/hospital.js"></script>
 <script src="assets/js/data.js"></script>
 <script src="assets/js/charts.js"></script>

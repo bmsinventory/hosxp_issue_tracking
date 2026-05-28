@@ -23,7 +23,8 @@ var TAB_TITLES = {
   overview:  'ภาพรวมจังหวัด',
   byhosp:    'รายโรงพยาบาล',
   all:       'ปัญหาทั้งหมด',
-  hospitals: 'จัดการโรงพยาบาล'
+  hospitals: 'จัดการโรงพยาบาล',
+  user:      'ผู้ใช้งาน'
 };
 
 var MAP_FIELDS = [
